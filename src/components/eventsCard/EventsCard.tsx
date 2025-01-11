@@ -31,8 +31,8 @@ const EventsCard = ({ event }: { event: Event }) => {
   ]);
   const [newComment, setNewComment] = useState('');
 
-  const formattedTime = new Date(event.time).toLocaleString();
-
+  const formattedTime = new Date(event.start_time*1000).toLocaleString();
+  console.log(event.start_time);
   const handleBookClick = () => {
     setShowForm(true);
   };
