@@ -13,6 +13,7 @@ const HostEvent = () => {
     event_description: '',
     event_venue: '',
     ticket_price: '',
+    duration: '',
   });
 
   const handleChange = (
@@ -54,6 +55,7 @@ const HostEvent = () => {
           formData.event_date,
           formData.event_description,
           BigInt(formData.ticket_price),
+          formData.duration,
         ]);
 
         const allAccounts = await web3Accounts();
@@ -92,6 +94,7 @@ const HostEvent = () => {
           event_description: '',
           event_venue: '',
           ticket_price: '',
+          duration: '',
         });
       }
     }
@@ -170,20 +173,37 @@ const HostEvent = () => {
               onChange={handleChange}
             />
           </div>
-          <div className='flex flex-col py-3 w-full'>
-            <label
-              htmlFor='ticket_price'
-              className='text-[#00ADB5] font-semibold'
-            >
-              Ticket Price
-            </label>
-            <input
-              type='number'
-              id='ticket_price'
-              name='ticket_price'
-              className='border border-[#00ADB5] rounded-lg bg-[#0D1B2A] my-1 text-white py-2 px-3 outline-none'
-              onChange={handleChange}
-            />
+          <div className='flex flex-col md:flex-row gap-6 py-3'>
+            <div className='flex flex-col w-full md:w-1/2'>
+              <label
+                htmlFor='ticket_price'
+                className='text-[#00ADB5] font-semibold'
+              >
+                Ticket Price
+              </label>
+              <input
+                type='number'
+                id='ticket_price'
+                name='ticket_price'
+                className='border border-[#00ADB5] rounded-lg bg-[#0D1B2A] my-1 text-white py-2 px-3 outline-none'
+                onChange={handleChange}
+              />
+            </div>
+            <div className='flex flex-col w-full md:w-1/2'>
+              <label
+                htmlFor='duration'
+                className='text-[#00ADB5] font-semibold'
+              >
+                Duration
+              </label>
+              <input
+                type='text'
+                id='duration'
+                name='duration'
+                className='border border-[#00ADB5] rounded-lg bg-[#0D1B2A] my-1 text-white py-2 px-3 outline-none'
+                onChange={handleChange}
+              />
+            </div>
           </div>
           <div className='flex justify-center my-5'>
             <button className='px-5 py-3 font-bold text-[#0D1B2A] rounded-lg bg-[#14FF9E] hover:bg-[#12e08c] transition duration-300'>
