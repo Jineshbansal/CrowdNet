@@ -136,7 +136,7 @@ const EventsCard = ({ event }: { event: Event }) => {
         </div>
         <div className='flex justify-between mb-4'>
           <p>
-            <strong>Price:</strong> {event.initial_price}
+            <strong>Price:</strong> {parseInt((event.initial_price).toString(), 16)}
           </p>
         </div>
         <div className='flex justify-between items-center'>
