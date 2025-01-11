@@ -6,7 +6,15 @@ import { Sails } from 'sails-js';
 import { SailsIdlParser } from 'sails-js-parser';
 import { idl } from '@/app/utils';
 const Tickets = () => {
-  const [tickets, setTickets] = useState([]);
+  interface Ticket {
+    id: string;
+    eventName: string;
+    place: string;
+    time: string;
+    ticketCount: number;
+  }
+
+  const [tickets, setTickets] = useState<Ticket[]>([]);
 
   useEffect(() => {
     const initialize = async () => {
@@ -23,11 +31,32 @@ const Tickets = () => {
           sails.setApi(gearApi);
           sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
           console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
-          const alice = 'kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW';
-          const myEvents = await sails.services.Common.queries.GetMyEvents(
+          const alice = 'kGg5hTfRcyaYX6wUdpNi7hpbYLQPGdF85q96fGn21w6pkJu4w';
+          const myEvents = (await sails.services.Common.queries.GetMyEvents(
             alice
-          );
+          )) as any[];
+
           console.log(myEvents);
+          const formattedTickets = myEvents.map((event) => {
+            const formattedTime = new Date(
+              Number(event[2].start_time) * 1000
+            ).toLocaleString('en-US', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric',
+              hour12: true,
+            });
+            return {
+              id: event[1],
+              eventName: event[2].name,
+              place: event[2].venue,
+              time: formattedTime,
+              ticketCount: event[3],
+            };
+          });
+          setTickets(formattedTickets);
         } catch (e) {
           console.log('error:', e);
         }
@@ -190,6 +219,10 @@ const Tickets = () => {
                 <p className='text-[25px] font-bold'>{ticket.eventName}</p>
                 <p className='text-[18px]'>{ticket.place}</p>
                 <p className='text-[18px]'>{ticket.time}</p>
+                <p className='text-[18px]'>
+                  Total Tickets: {ticket.ticketCount}
+                </p>{' '}
+                {/* Display ticket count */}
               </div>
               <div className='flex gap-3'>
                 <button

@@ -206,7 +206,7 @@ service Common {
   query DisplayEvents : () -> vec struct { actor_id, vec CommonEvent };
   query GetAudience : () -> vec struct { u32, vec struct { actor_id, u256 } };
   query GetEventCount : () -> u32;
-  query GetInteractions : () -> vec struct { u32, struct { u32, vec str } };
+  query GetInteractions : (event_id: u32) -> struct { u32, vec str };
   query GetMyEvents : () -> vec struct { actor_id, u32, CommonEvent, u8 };
 };
 
@@ -224,6 +224,7 @@ service Events {
   Transfer : (from: actor_id, to: actor_id, value: u256) -> bool;
   TransferFrom : (from: actor_id, to: actor_id, value: u256) -> bool;
   query TransferTicket : (ticket_count: u8, event_id: u32, transfer_id: actor_id) -> bool;
+  query GetContractBalance : () -> u256;
   query GetMyBalance : () -> u256;
   query GetTicketPrices : () -> vec struct { u32, u256 };
   query Allowance : (owner: actor_id, spender: actor_id) -> u256;

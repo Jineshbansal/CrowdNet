@@ -23,15 +23,13 @@ const EventsCard = ({ event }: { event: Event }) => {
   const [ticketCount, setTicketCount] = useState(1);
   const [showDetails, setShowDetails] = useState(false);
   const ticketPrice = 50;
-  const [likes, setLikes] = useState(120);
-  const [comments, setComments] = useState([
-    { id: 1, text: 'Great event!' },
-    { id: 2, text: 'Looking forward to it.' },
-    { id: 3, text: `Can't wait!` },
-  ]);
+  const [likes, setLikes] = useState(0);
+  const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
 
-  const formattedTime = new Date(event.start_time).toLocaleString('en-US', {
+  const formattedTime = new Date(
+    Number(event.start_time) * 1000
+  ).toLocaleString('en-US', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -215,6 +213,47 @@ const EventsCard = ({ event }: { event: Event }) => {
     setShowForm(false);
   };
 
+  useEffect(() => {
+    const initialize = async () => {
+      const parser = await SailsIdlParser.new();
+      const sails = new Sails(parser);
+
+      async function State() {
+        try {
+          sails.parseIdl(idl);
+          const gearApi = await GearApi.create({
+            providerAddress: 'wss://testnet.vara.network',
+          });
+          sails.setApi(gearApi);
+          sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
+          const alice = 'kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW';
+          console.log(event.event_id);
+          const interactionsData =
+            await sails.services.Common.queries.GetInteractions(
+              alice,
+              null,
+              null,
+              event.event_id
+            );
+          console.log(interactionsData);
+          setLikes(interactionsData[0]);
+          setComments(
+            interactionsData[1].map((text: string, index: number) => ({
+              id: index + 1,
+              text,
+            }))
+          );
+        } catch (e) {
+          console.log('error:', e);
+        }
+      }
+
+      State();
+    };
+
+    initialize();
+  }, [event.event_id, likes, comments]);
+
   return (
     <div className='relative' key={event.event_id} id='event.id'>
       <div className='bg-[#6a0dad] text-white p-6 rounded-lg shadow-lg max-w-sm mx-auto transition-transform transform hover:scale-105'>
@@ -232,7 +271,7 @@ const EventsCard = ({ event }: { event: Event }) => {
             <strong>Venue:</strong> {event.venue}
           </p>
           <p>
-            <strong>Price:</strong>{' '}
+            <strong>Ticket Price:</strong>{' '}
             {parseInt(event.initial_price.toString(), 16)}
           </p>
         </div>

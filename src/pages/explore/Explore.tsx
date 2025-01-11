@@ -1,14 +1,16 @@
 import { Header } from '@/components';
 import { EventsCard } from '@/components/eventsCard';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GearApi } from '@gear-js/api';
 import { Sails } from 'sails-js';
 import { SailsIdlParser } from 'sails-js-parser';
 import { idl } from '@/app/utils';
-import { useState } from 'react';
+import Loader from '@/components/loader/Loader';
 
 const Explore = () => {
   const [events, setEvents] = useState<any>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
   useEffect(() => {
     const initialize = async () => {
       const parser = await SailsIdlParser.new();
@@ -27,16 +29,16 @@ const Explore = () => {
           const alice = 'kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW';
           const transaction: any =
             await sails.services.Common.queries.DisplayEvents(alice);
-          const interactionsData =
-            await sails.services.Common.queries.GetInteractions(alice);
-          console.log(interactionsData);
+
           const eventsData = transaction.flatMap((tx: any) => tx[1]);
           setEvents(eventsData);
+          setLoading(false);
 
           console.log(eventsData);
           console.log('Transaction:', transaction);
         } catch (e) {
           console.log('error:', e);
+          setLoading(false);
         }
       }
 
@@ -64,9 +66,17 @@ const Explore = () => {
           </div>
         </div>
         <div className='events grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4'>
-          {events?.map((event: any) => (
-            <EventsCard event={event} key={event.event_id} />
-          ))}
+          {loading ? (
+            <Loader />
+          ) : events.length > 0 ? (
+            events.map((event: any) => (
+              <EventsCard event={event} key={event.event_id} />
+            ))
+          ) : (
+            <p className='text-white text-center col-span-full'>
+              No data to show
+            </p>
+          )}
         </div>
       </div>
     </>

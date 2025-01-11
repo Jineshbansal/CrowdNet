@@ -25,6 +25,12 @@ export function Header({ isAccountVisible }: Props) {
         >
           {isExplorePage ? 'Host' : 'Explore'}
         </Link>
+        <Link
+          to='/tickets'
+          className='text-[28px] text-[#FFC947]'
+        >
+          My Tickets
+        </Link>
         <Wallet theme='gear' />
         {/* {isAccountVisible && <Wallet theme='vara' />} */}
         {/* <button className='bg-yellow-500 hover:bg-yellow-600 text-black font-medium text-[19px] py-[14px] px-7 rounded-lg shadow-md'>
