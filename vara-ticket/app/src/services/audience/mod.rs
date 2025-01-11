@@ -30,20 +30,34 @@ impl AudienceService {
         let audience = Storage::get_audience();
         cancel_and_refund((ticket_count, event_id, msg::source()), audience);
 
-        let payload = [
-            "Events".encode(),
-            "TransaferRefund".to_string().encode(),
-            (ticket_count, event_id, msg::source()).encode(),
-        ]
-        .concat();
+        // let payload = [
+        //     "Events".encode(),
+        //     "TransaferRefund".to_string().encode(),
+        //     (ticket_count, event_id, msg::source()).encode(),
+        // ]
+        // .concat();
 
-        msg::send(exec::program_id(), payload, 500_000_000_000).is_ok()
+        // msg::send(exec::program_id(), payload, 500_000_000_000).is_ok()
+
+        let mut price = U256::from(0);
+        self.funds.get_ticket_prices().iter().for_each(|x| {
+            if x.0 == event_id {
+                price = x.1;
+            }
+        });
+
+        self.funds.vft.transfer(
+            exec::program_id(),
+            msg::source(),
+            U256::from(ticket_count) * price,
+        )
     }
 
     pub fn transfer_refund(&mut self, ticket_count: u8, event_id: u32, to: ActorId) -> bool {
-        if msg::source() != exec::program_id() {
-            return false;
-        }
+        // if msg::source() != exec::program_id() {
+        //     return false;
+        // }
+
         let mut price = U256::from(0);
         self.funds.get_ticket_prices().iter().for_each(|x| {
             if x.0 == event_id {
@@ -53,7 +67,7 @@ impl AudienceService {
 
         self.funds
             .vft
-            .transfer(to, U256::from(ticket_count) * price)
+            .transfer(exec::program_id(), to, U256::from(ticket_count) * price)
     }
 
     pub fn transfer_ticket(&self, ticket_count: u8, event_id: u32, transfer_id: ActorId) -> bool {
