@@ -78,11 +78,9 @@ export function Header({ isAccountVisible }: Props) {
         </Link>
         <div className='flex flex-col items-end text-[#FFC947]'>
           <span className='text-[20px]'>
-            Contract Balance: {contractBalance} TVARA
+            Contract Balance: {contractBalance} TOKENS
           </span>
-          <span className='text-[20px]'>
-            Token Balance: {tokenBalance} TOKENS
-          </span>
+          <span className='text-[20px]'>My Balance: {tokenBalance} TOKENS</span>
         </div>
         <Wallet theme='gear' />
         {/* {isAccountVisible && <Wallet theme='vara' />} */}
