@@ -1,6 +1,4 @@
-import { Logo } from './logo';
 import { Wallet } from '@gear-js/wallet-connect';
-import styles from './header.module.scss';
 import logo from '../../../assets/images/icons/bookitnow.svg';
 import { Link, useLocation } from 'react-router-dom';
 

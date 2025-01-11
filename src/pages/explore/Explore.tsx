@@ -1,7 +1,46 @@
 import { Header } from '@/components';
 import { EventsCard } from '@/components/eventsCard';
+import { useEffect } from 'react';
+import { GearApi } from '@gear-js/api';
+import { Sails } from 'sails-js';
+import { SailsIdlParser } from 'sails-js-parser';
+import { Keyring } from '@polkadot/api';
+import { WsProvider } from '@polkadot/api';
+import { idl } from '@/app/utils';
 
 const Explore = () => {
+  useEffect(() => {
+    const initialize = async () => {
+      const parser = await SailsIdlParser.new();
+      const sails = new Sails(parser);
+
+      async function State() {
+        console.log('hello');
+        try {
+          sails.parseIdl(idl);
+          const gearApi = await GearApi.create({
+            providerAddress: 'wss://testnet.vara.network',
+          });
+          sails.setApi(gearApi);
+          sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
+          console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
+          const alice = 'kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW';
+          const transaction = await sails.services.Common.queries.DisplayEvents(
+            alice
+          );
+
+          console.log('Transaction:', transaction);
+        } catch (e) {
+          console.log('error:', e);
+        }
+      }
+
+      State();
+    };
+
+    initialize();
+  }, []);
+
   return (
     <>
       <Header />
