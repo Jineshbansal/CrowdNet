@@ -52,14 +52,16 @@ const HostEvent = () => {
           alice
         );
         console.log(eventCount);
+        console.log('Event Count:', formData.event_date);
+        console.log('Event Count:', formData.duration);
         const transaction = sails.services.Events.functions.CreateEvent([
           eventCount,
+          formData.duration,
+          BigInt(Math.floor(new Date(formData.event_date).getTime() / 1000)),
           formData.event_name,
           formData.event_venue,
-          formData.event_date,
           formData.event_description,
           BigInt(formData.ticket_price),
-          formData.duration,
         ]);
 
         const allAccounts = await web3Accounts();

@@ -18,7 +18,7 @@ pub struct Event {
     pub name: String,
     pub venue: String,
     pub time: u64,
-    pub start_time:u64,
+    pub start_time: u64,
     pub description: String,
     pub initial_price: U256,
 }
@@ -146,9 +146,8 @@ impl CommonService {
         self.get().event_count.clone()
     }
 
-    pub fn get_interactions(&self) -> Vec<(u32, (u32, Vec<String>))> {
-        let interactions = self.get().interactions.clone();
-        interactions.into_iter().collect()
+    pub fn get_interactions(&self, event_id: u32) -> (u32, Vec<String>) {
+        self.get().interactions.get(&event_id).unwrap().clone()
     }
 
     pub fn get_audience(&self) -> Vec<(u32, Vec<(ActorId, U256)>)> {
