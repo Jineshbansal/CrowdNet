@@ -84,6 +84,10 @@ impl FundService {
         self.vft.balance_of(msg::source())
     }
 
+    pub fn get_contract_balance(&self) -> U256 {
+        self.vft.balance_of(exec::program_id())
+    }
+
     pub fn get_ticket_prices(&self) -> Vec<(u32, U256)> {
         let prices = self.get().ticket_prices.clone();
         prices.into_iter().collect()
