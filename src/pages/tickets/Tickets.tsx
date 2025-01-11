@@ -1,6 +1,10 @@
 import { Header } from '@/components';
 import { useState, useEffect } from 'react';
-
+import { web3FromSource, web3Accounts } from '@polkadot/extension-dapp';
+import { GearApi } from '@gear-js/api';
+import { Sails } from 'sails-js';
+import { SailsIdlParser } from 'sails-js-parser';
+import { idl } from '@/app/utils';
 const Tickets = () => {
   const [tickets, setTickets] = useState([]);
 
@@ -22,10 +26,47 @@ const Tickets = () => {
     ]);
   }, []);
 
-  const handleCancel = (id) => {
+  const handleCancel = async (ticketsNum,id) => {
     // Handle cancel ticket
     const parser = await SailsIdlParser.new();
     const sails = new Sails(parser);
+    sails.parseIdl(idl);
+    const gearApi = await GearApi.create({
+              providerAddress: 'wss://testnet.vara.network',
+            });
+    sails.setApi(gearApi);
+    sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
+    console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
+    const transaction = sails.services.Events.functions.CancelAndRefund(
+      ticketsNum
+    );
+
+    const allAccounts = await web3Accounts();
+    const account = allAccounts[0];
+    const injector = await web3FromSource(account.meta.source);
+    transaction.withAccount(account.address, { signer: injector.signer });
+
+    transaction.withGas(100_000_000_000n);
+    const fee = await transaction.transactionFee();
+    console.log('Transaction fee:', fee.toString());
+    const { msgId, blockHash, txHash, response, isFinalized } =
+      await transaction.signAndSend();
+
+    console.log('Message ID:', msgId);
+    console.log('Transaction hash:', txHash);
+    console.log('Block hash:', blockHash);
+
+    // Check if the transaction is finalized
+    const finalized = await isFinalized;
+    console.log('Is finalized:', finalized);
+
+    // Get the response from the program
+    try {
+      const result = await response();
+      console.log('Program response:', result);
+    } catch (error) {
+      console.error('Error executing message:', error);
+    }
   };
 
   const handleTransfer = (id) => {
