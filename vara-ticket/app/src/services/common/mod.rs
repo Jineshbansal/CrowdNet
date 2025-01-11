@@ -77,6 +77,37 @@ impl CommonService {
         Self(())
     }
 
+    pub fn get_my_events(&self) -> Vec<(ActorId, u32, Event, u8)> {
+        let audience = self.get().audience.clone();
+        let events = self.get().events.clone();
+
+        let mut map: HashMap<u32, u8> = HashMap::new();
+
+        // Build the map of event_id to ticket counts
+        for (event_id, people) in audience {
+            for person in people {
+                if person.0 == msg::source() {
+                    map.entry(event_id).and_modify(|x| *x += 1).or_insert(1); // Corrected default count to 1
+                }
+            }
+        }
+
+        let mut final_vec: Vec<(ActorId, u32, Event, u8)> = Vec::new();
+
+        // Iterate over map and events once to build final_vec
+        for (event_id, ticket_count) in &map {
+            for (host_id, events_list) in &events {
+                for event_details in events_list {
+                    if *event_id == event_details.event_id {
+                        final_vec.push((*host_id, *event_id, event_details.clone(), *ticket_count));
+                    }
+                }
+            }
+        }
+
+        final_vec
+    }
+
     pub fn add_admin(&mut self, addr: ActorId) -> bool {
         let admins = &mut self.get_mut().admin;
         if admins.contains(&msg::source()) && !admins.contains(&addr) {

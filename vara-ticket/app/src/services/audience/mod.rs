@@ -51,7 +51,7 @@ impl AudienceService {
         )
     }
 
-    pub fn check_in(&self, ticket_count: u8, event_id: u32) -> bool {
+    pub fn check_in(&mut self, ticket_count: u8, event_id: u32) -> bool {
         check_in(
             (ticket_count, event_id, msg::source()),
             &mut Storage::get_audience(),

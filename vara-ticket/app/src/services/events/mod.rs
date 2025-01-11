@@ -41,7 +41,7 @@ impl EventService {
         self.audience.funds.create_event()
     }
 
-    pub fn update_event(&self, event_details: (u32,String, String, String, String, U256)) -> bool {
+    pub fn update_event(&mut self, event_details: (u32, String, String, String, U256)) -> bool {
         let events = Storage::get_events();
         let new_event = Event {
             event_id: event_details.0,
@@ -80,7 +80,9 @@ impl EventService {
         interactions.remove_entry(&event_id);
 
         // Events
-        cancel_event(&msg::source(), event_id, events)
+        cancel_event(&msg::source(), event_id, events);
+
+        self.audience.funds.cancel_event()
     }
 
     pub fn finish_event(&mut self, host_id: ActorId, event_id: u32) -> bool {
