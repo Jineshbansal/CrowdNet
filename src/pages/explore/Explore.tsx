@@ -27,7 +27,9 @@ const Explore = () => {
           const alice = 'kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW';
           const transaction: any =
             await sails.services.Common.queries.DisplayEvents(alice);
-
+          const interactionsData =
+            await sails.services.Common.queries.GetInteractions(alice);
+          console.log(interactionsData);
           const eventsData = transaction.flatMap((tx: any) => tx[1]);
           setEvents(eventsData);
 

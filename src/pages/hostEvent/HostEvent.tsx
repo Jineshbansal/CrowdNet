@@ -42,8 +42,13 @@ const HostEvent = () => {
         sails.setApi(gearApi);
         sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
         console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
+        const alice = 'kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW';
+        const eventCount = await sails.services.Common.queries.GetEventCount(
+          alice
+        );
+        console.log(eventCount);
         const transaction = sails.services.Events.functions.CreateEvent([
-          5,
+          eventCount,
           formData.event_name,
           formData.event_venue,
           formData.event_date,

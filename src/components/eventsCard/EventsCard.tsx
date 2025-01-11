@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { FaThumbsUp, FaComment } from 'react-icons/fa';
+import { FaThumbsUp, FaComment, FaTimes } from 'react-icons/fa';
 import eventPic from '@/assets/images/event.jpg';
 import { GearApi } from '@gear-js/api';
 import { Sails } from 'sails-js';
 import { SailsIdlParser } from 'sails-js-parser';
 import { web3FromSource, web3Accounts } from '@polkadot/extension-dapp';
 import { idl } from '@/app/utils';
+import { useEffect } from 'react';
 
 interface Event {
   event_id: number;
@@ -13,7 +14,8 @@ interface Event {
   venue: string;
   time: string;
   description: string;
-  intitial_price: number;
+  initial_price: number;
+  duration: number;
 }
 
 const EventsCard = ({ event }: { event: Event }) => {
@@ -27,6 +29,9 @@ const EventsCard = ({ event }: { event: Event }) => {
     { id: 2, text: 'Looking forward to it.' },
     { id: 3, text: `Can't wait!` },
   ]);
+  const [newComment, setNewComment] = useState('');
+
+  const formattedTime = new Date(event.time).toLocaleString();
 
   const handleBookClick = () => {
     setShowForm(true);
@@ -54,7 +59,95 @@ const EventsCard = ({ event }: { event: Event }) => {
     setShowDetails(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLike = async (eventId: number) => {
+    console.log(eventId);
+    const parser = await SailsIdlParser.new();
+    const sails = new Sails(parser);
+    sails.parseIdl(idl);
+    const gearApi = await GearApi.create({
+      providerAddress: 'wss://testnet.vara.network',
+    });
+    sails.setApi(gearApi);
+    sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
+    console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
+    const transaction = sails.services.Common.functions.InteractLike(eventId);
+
+    const allAccounts = await web3Accounts();
+    const account = allAccounts[0];
+    const injector = await web3FromSource(account.meta.source);
+    transaction.withAccount(account.address, { signer: injector.signer });
+
+    transaction.withGas(100_000_000_000n);
+    const fee = await transaction.transactionFee();
+    console.log('Transaction fee:', fee.toString());
+    const { msgId, blockHash, txHash, response, isFinalized } =
+      await transaction.signAndSend();
+
+    console.log('Message ID:', msgId);
+    console.log('Transaction hash:', txHash);
+    console.log('Block hash:', blockHash);
+
+    // Check if the transaction is finalized
+    const finalized = await isFinalized;
+    console.log('Is finalized:', finalized);
+
+    // Get the response from the program
+    try {
+      const result = await response();
+      console.log('Program response:', result);
+    } catch (error) {
+      console.error('Error executing message:', error);
+    }
+  };
+
+  const handleAddComment = async (eventId: number) => {
+    if (newComment.trim() === '') return;
+
+    const parser = await SailsIdlParser.new();
+    const sails = new Sails(parser);
+    sails.parseIdl(idl);
+    const gearApi = await GearApi.create({
+      providerAddress: 'wss://testnet.vara.network',
+    });
+    sails.setApi(gearApi);
+    sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
+    console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
+    const transaction = sails.services.Common.functions.InteractComment(
+      eventId,
+      newComment
+    );
+
+    const allAccounts = await web3Accounts();
+    const account = allAccounts[0];
+    const injector = await web3FromSource(account.meta.source);
+    transaction.withAccount(account.address, { signer: injector.signer });
+
+    transaction.withGas(100_000_000_000n);
+    const fee = await transaction.transactionFee();
+    console.log('Transaction fee:', fee.toString());
+    const { msgId, blockHash, txHash, response, isFinalized } =
+      await transaction.signAndSend();
+
+    console.log('Message ID:', msgId);
+    console.log('Transaction hash:', txHash);
+    console.log('Block hash:', blockHash);
+
+    // Check if the transaction is finalized
+    const finalized = await isFinalized;
+    console.log('Is finalized:', finalized);
+
+    // Get the response from the program
+    try {
+      const result = await response();
+      console.log('Program response:', result);
+      setComments([...comments, { id: comments.length + 1, text: newComment }]);
+      setNewComment('');
+    } catch (error) {
+      console.error('Error executing message:', error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent, eventId: number) => {
     e.preventDefault();
 
     console.log('Submitted');
@@ -72,10 +165,11 @@ const EventsCard = ({ event }: { event: Event }) => {
         sails.setApi(gearApi);
         sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
         console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
+        console.log(eventId);
         const transaction = sails.services.Events.functions.CreateEvent(
           null,
           null,
-          [ticketCount, 100]
+          [ticketCount, eventId]
         );
 
         const allAccounts = await web3Accounts();
@@ -128,15 +222,16 @@ const EventsCard = ({ event }: { event: Event }) => {
         <p className='mb-4'>{event.description}</p>
         <div className='flex justify-between mb-2'>
           <p>
-            <strong>Place:</strong> {event.venue}
+            <strong>Venue:</strong> {event.venue}
           </p>
           <p>
-            <strong>Time:</strong> {event.time}
+            <strong>Price:</strong>{' '}
+            {parseInt(event.initial_price.toString(), 16)}
           </p>
         </div>
         <div className='flex justify-between mb-4'>
           <p>
-            <strong>Price:</strong> {parseInt((event.initial_price).toString(), 16)}
+            <strong>Time:</strong> {formattedTime}
           </p>
         </div>
         <div className='flex justify-between items-center'>
@@ -159,7 +254,7 @@ const EventsCard = ({ event }: { event: Event }) => {
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
           <div className='bg-white p-6 rounded-lg shadow-lg max-w-sm w-full'>
             <h2 className='text-2xl font-bold mb-4'>Book Tickets</h2>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={(e) => handleSubmit(e, event.event_id)}>
               <div className='flex items-center mb-4'>
                 <button
                   type='button'
@@ -208,7 +303,7 @@ const EventsCard = ({ event }: { event: Event }) => {
           <div className='bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full overflow-y-auto max-h-screen flex'>
             <div className='w-3/4 pr-4'>
               <h2 className='text-3xl font-bold mb-4 text-center text-[#6a0dad]'>
-                Event Details
+                {event.name} Details
               </h2>
               <img
                 src={eventPic}
@@ -216,58 +311,88 @@ const EventsCard = ({ event }: { event: Event }) => {
                 className='w-full h-64 object-cover rounded-lg mb-4 shadow-md'
               />
               <p className='mb-4 text-lg'>
-                <strong>Description:</strong> This is a detailed description of
-                the event. It provides an in-depth overview of what to expect,
-                including the schedule, speakers, and activities.
+                <strong>Description:</strong> {event.description}
               </p>
               <p className='mb-4 text-lg'>
-                <strong>Location:</strong> Event Location
+                <strong>Location:</strong> {event.venue}
               </p>
               <p className='mb-4 text-lg'>
-                <strong>Time:</strong> Event Time
+                <strong>Time:</strong> {formattedTime}
               </p>
               <p className='mb-4 text-lg'>
-                <strong>Price:</strong> $50
+                <strong>Price:</strong> $
+                {parseInt(event.initial_price.toString(), 16)}
               </p>
             </div>
-            <div className='w-1/4 pl-4 border-l border-gray-200'>
-              <h3 className='text-xl font-bold mb-4 text-[#6a0dad]'>
-                Likes & Comments
-              </h3>
-              <div className='mb-4 flex items-center'>
-                <FaThumbsUp className='text-[#6a0dad] mr-2' />
-                <span className='text-lg font-bold mr-2'>Likes:</span>
-                <span className='text-lg bg-gray-200 px-2 py-1 rounded-full'>
-                  {likes}
-                </span>
-              </div>
-              <div className='mb-4 flex items-center'>
-                <FaComment className='text-[#6a0dad] mr-2' />
-                <span className='text-lg font-bold'>Comments:</span>
-                <span className='text-lg bg-gray-200 px-2 py-1 rounded-full ml-2'>
-                  {comments.length}
-                </span>
-              </div>
-              <div className='mb-4'>
-                <strong>Comments:</strong>
-                <ul className='list-disc list-inside mt-2'>
-                  {comments.map((comment) => (
-                    <li
-                      key={comment.id}
-                      className='mb-2 text-lg bg-gray-100 p-2 rounded-lg shadow-sm'
-                    >
-                      {comment.text}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            <div className='w-1/4 pl-4 border-l border-gray-200 relative'>
               <button
                 type='button'
-                className='bg-[#6a0dad] text-white font-bold py-2 px-4 rounded hover:bg-[#5a0c9d] transition-colors w-full'
+                className='absolute top-0 right-0 mt-2 mr-2 text-gray-500 hover:text-gray-700 transition-colors'
                 onClick={handleCloseDetails}
+                style={{ zIndex: 10 }}
               >
-                Close
+                <FaTimes size={24} />
               </button>
+              <div className='mt-10'>
+                <h3 className='text-xl font-bold mb-4 text-[#6a0dad]'>
+                  Likes & Comments
+                </h3>
+                <div className='mb-4 flex items-center'>
+                  <FaThumbsUp className='text-[#6a0dad] mr-2' />
+                  <span className='text-lg font-bold mr-2'>Likes:</span>
+                  <span className='text-lg bg-gray-200 px-2 py-1 rounded-full'>
+                    {likes}
+                  </span>
+                  <button
+                    className='ml-2 bg-[#6a0dad] text-white font-bold py-1 px-2 rounded hover:bg-[#5a0c9d] transition-colors'
+                    onClick={() => handleLike(event.event_id)}
+                  >
+                    Like
+                  </button>
+                </div>
+                <div className='mb-4 flex items-center'>
+                  <FaComment className='text-[#6a0dad] mr-2' />
+                  <span className='text-lg font-bold'>Comments:</span>
+                  <span className='text-lg bg-gray-200 px-2 py-1 rounded-full ml-2'>
+                    {comments.length}
+                  </span>
+                </div>
+                <div className='mb-4'>
+                  <strong>Comments:</strong>
+                  <ul className='list-disc list-inside mt-2'>
+                    {comments.map((comment) => (
+                      <li
+                        key={comment.id}
+                        className='mb-2 text-lg bg-gray-100 p-2 rounded-lg shadow-sm'
+                      >
+                        {comment.text}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className='mt-4'>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleAddComment(event.event_id);
+                      }}
+                    >
+                      <input
+                        type='text'
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        className='w-full p-2 border border-gray-300 rounded mb-2'
+                        placeholder='Add a comment...'
+                      />
+                      <button
+                        type='submit'
+                        className='bg-[#6a0dad] text-white font-bold py-2 px-4 rounded hover:bg-[#5a0c9d] transition-colors'
+                      >
+                        Add Comment
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

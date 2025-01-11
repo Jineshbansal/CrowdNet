@@ -9,36 +9,50 @@ const Tickets = () => {
   const [tickets, setTickets] = useState([]);
 
   useEffect(() => {
-    // Fetch tickets from API or context
-    setTickets([
-      {
-        id: 1,
-        eventName: 'Blockchain Conference',
-        place: 'New York',
-        time: '2023-11-01 10:00 AM',
-      },
-      {
-        id: 2,
-        eventName: 'Web3 Meetup',
-        place: 'San Francisco',
-        time: '2023-12-15 02:00 PM',
-      },
-    ]);
+    const initialize = async () => {
+      const parser = await SailsIdlParser.new();
+      const sails = new Sails(parser);
+
+      async function State() {
+        console.log('hello');
+        try {
+          sails.parseIdl(idl);
+          const gearApi = await GearApi.create({
+            providerAddress: 'wss://testnet.vara.network',
+          });
+          sails.setApi(gearApi);
+          sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
+          console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
+          const alice = 'kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW';
+          const myEvents = await sails.services.Common.queries.GetMyEvents(
+            alice
+          );
+          console.log(myEvents);
+        } catch (e) {
+          console.log('error:', e);
+        }
+      }
+
+      State();
+    };
+
+    initialize();
   }, []);
 
-  const handleCancel = async (ticketsNum,id) => {
+  const handleCancel = async (ticketsNum, id) => {
     // Handle cancel ticket
     const parser = await SailsIdlParser.new();
     const sails = new Sails(parser);
     sails.parseIdl(idl);
     const gearApi = await GearApi.create({
-              providerAddress: 'wss://testnet.vara.network',
-            });
+      providerAddress: 'wss://testnet.vara.network',
+    });
     sails.setApi(gearApi);
     sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
     console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
     const transaction = sails.services.Events.functions.CancelAndRefund(
-      ticketsNum,id
+      ticketsNum,
+      id
     );
 
     const allAccounts = await web3Accounts();
@@ -69,19 +83,21 @@ const Tickets = () => {
     }
   };
 
-  const handleTransfer = async (ticket_count,event_id,transfer_id) => {
+  const handleTransfer = async (ticket_count, event_id, transfer_id) => {
     // Handle transfer ticket
     const parser = await SailsIdlParser.new();
     const sails = new Sails(parser);
     sails.parseIdl(idl);
     const gearApi = await GearApi.create({
-              providerAddress: 'wss://testnet.vara.network',
-            });
+      providerAddress: 'wss://testnet.vara.network',
+    });
     sails.setApi(gearApi);
     sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
     console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
     const transaction = sails.services.Events.functions.CancelAndRefund(
-      ticket_count,event_id,transfer_id
+      ticket_count,
+      event_id,
+      transfer_id
     );
 
     const allAccounts = await web3Accounts();
@@ -112,20 +128,21 @@ const Tickets = () => {
     }
   };
 
-  const handleCheckIn =async (ticket_count,event_id) => {
+  const handleCheckIn = async (ticket_count, event_id) => {
     // Handle check-in ticket
     // Handle transfer ticket
     const parser = await SailsIdlParser.new();
     const sails = new Sails(parser);
     sails.parseIdl(idl);
     const gearApi = await GearApi.create({
-              providerAddress: 'wss://testnet.vara.network',
-            });
+      providerAddress: 'wss://testnet.vara.network',
+    });
     sails.setApi(gearApi);
     sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
     console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
     const transaction = sails.services.Events.functions.CheckIn(
-      ticket_count,event_id
+      ticket_count,
+      event_id
     );
 
     const allAccounts = await web3Accounts();
