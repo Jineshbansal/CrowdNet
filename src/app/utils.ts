@@ -186,53 +186,52 @@ export const addTokensToVoucher = (
 
 export const idl = `
 type CommonEvent = struct {
-event_id: u32,
-venue: str,
-time: str,
-description: str,
-initial_price: u256,
+  event_id: u32,
+  venue: str,
+  time: str,
+  description: str,
+  initial_price: u256,
 };
 
 constructor {
-New : ();
+  New : ();
 };
 
 service Common {
-AddAdmin : (addr: actor_id) -> bool;
-InteractComment : (event_id: u32, comment: str) -> bool;
-InteractLike : (event_id: u32) -> bool;
-query DisplayEvents : () -> vec struct { actor_id, vec CommonEvent };
-query GetAdmins : () -> vec actor_id;
-query GetAudience : () -> vec struct { u32, vec struct { actor_id, u256 } };
-query GetEventsName : () -> vec struct { actor_id, vec CommonEvent };
-query GetLikes : () -> vec struct { u32, struct { u32, vec str } };
+  AddAdmin : (addr: actor_id) -> bool;
+  InteractComment : (event_id: u32, comment: str) -> bool;
+  InteractLike : (event_id: u32) -> bool;
+  query DisplayEvents : () -> vec struct { actor_id, vec CommonEvent };
+  query GetAudience : () -> vec struct { u32, vec struct { actor_id, u256 } };
+  query GetEventCount : () -> u32;
+  query GetInteractions : () -> vec struct { u32, struct { u32, vec str } };
 };
 
 service Events {
-CancelEvent : (event_id: u32) -> bool;
-CreateEvent : (event_details: struct { u32, str, str, str, u256 }) -> bool;
-CancelAndRefund : (ticket_count: u8, event_id: u32) -> bool;
-PurchaseTicket : (ticket_count: u8, event_id: u32) -> bool;
-TransferRefund : (ticket_count: u8, event_id: u32, to: actor_id) -> bool;
-Burn : (from: actor_id, value: u256) -> bool;
-Mint : (to: actor_id, value: u256) -> bool;
-Approve : (spender: actor_id, value: u256) -> bool;
-Transfer : (from: actor_id, to: actor_id, value: u256) -> bool;
-TransferFrom : (from: actor_id, to: actor_id, value: u256) -> bool;
-query UpdateEvent : (event_details: struct { u32, str, str, str, u256 }) -> bool;
-query CheckIn : (ticket_count: u8, event_id: u32) -> bool;
-query TransferTicket : (ticket_count: u8, event_id: u32, transfer_id: actor_id) -> bool;
-query GetTicketPrices : () -> vec struct { u32, u256 };
-query Allowance : (owner: actor_id, spender: actor_id) -> u256;
-query BalanceOf : (account: actor_id) -> u256;
-query Decimals : () -> u8;
-query Name : () -> str;
-query Symbol : () -> str;
-query TotalSupply : () -> u256;
+  CancelEvent : (event_id: u32) -> bool;
+  CreateEvent : (event_details: struct { u32, str, str, str, u256 }) -> bool;
+  FinishEvent : (host_id: actor_id, event_id: u32) -> bool;
+  CancelAndRefund : (ticket_count: u8, event_id: u32) -> bool;
+  PurchaseTicket : (ticket_count: u8, event_id: u32) -> bool;
+  Burn : (from: actor_id, value: u256) -> bool;
+  Mint : (to: actor_id, value: u256) -> bool;
+  Approve : (spender: actor_id, value: u256) -> bool;
+  Transfer : (from: actor_id, to: actor_id, value: u256) -> bool;
+  TransferFrom : (from: actor_id, to: actor_id, value: u256) -> bool;
+  query UpdateEvent : (event_details: struct { u32, str, str, str, u256 }) -> bool;
+  query CheckIn : (ticket_count: u8, event_id: u32) -> bool;
+  query TransferTicket : (ticket_count: u8, event_id: u32, transfer_id: actor_id) -> bool;
+  query GetTicketPrices : () -> vec struct { u32, u256 };
+  query Allowance : (owner: actor_id, spender: actor_id) -> u256;
+  query BalanceOf : (account: actor_id) -> u256;
+  query Decimals : () -> u8;
+  query Name : () -> str;
+  query Symbol : () -> str;
+  query TotalSupply : () -> u256;
 
-events {
-  Approval: struct { owner: actor_id, spender: actor_id, value: u256 };
-  Transfer: struct { from: actor_id, to: actor_id, value: u256 };
-}
+  events {
+    Approval: struct { owner: actor_id, spender: actor_id, value: u256 };
+    Transfer: struct { from: actor_id, to: actor_id, value: u256 };
+  }
 };
 `;
