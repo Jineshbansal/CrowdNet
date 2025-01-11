@@ -15,6 +15,21 @@ const Tickets = () => {
   }
 
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [showCancelForm, setShowCancelForm] = useState(false);
+  const [selectedTicketId, setSelectedTicketId] = useState('');
+  const [cancelTicketCount, setCancelTicketCount] = useState(0);
+  const [showTransferForm, setShowTransferForm] = useState(false);
+  const [transferTicketCount, setTransferTicketCount] = useState(0);
+  const [transferUserAddress, setTransferUserAddress] = useState('');
+  const [selectedTransferTicketId, setSelectedTransferTicketId] = useState('');
+
+  const handleIncrement = () => {
+    setCancelTicketCount((prevCount) => prevCount + 1);
+  };
+
+  const handleDecrement = () => {
+    setCancelTicketCount((prevCount) => (prevCount > 0 ? prevCount - 1 : 0));
+  };
 
   useEffect(() => {
     const initialize = async () => {
@@ -66,7 +81,7 @@ const Tickets = () => {
     };
 
     initialize();
-  }, []);
+  }, [tickets]);
 
   const handleCancel = async (ticketsNum, id) => {
     // Handle cancel ticket
@@ -202,6 +217,30 @@ const Tickets = () => {
     }
   };
 
+  const handleCancelClick = (ticketId: string) => {
+    setSelectedTicketId(ticketId);
+    setShowCancelForm(true);
+  };
+
+  const handleTransferClick = (ticketId: string) => {
+    setSelectedTransferTicketId(ticketId);
+    setShowTransferForm(true);
+  };
+
+  const handleCancelSubmit = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+    await handleCancel(cancelTicketCount, selectedTicketId);
+    setShowCancelForm(false);
+  };
+
+  const handleTransferSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    await handleTransfer(transferTicketCount, selectedTransferTicketId, transferUserAddress);
+    setShowTransferForm(false);
+  };
+
   return (
     <>
       <Header />
@@ -227,13 +266,13 @@ const Tickets = () => {
               <div className='flex gap-3'>
                 <button
                   className='bg-[#FFC947] text-black font-medium text-[16px] py-2 px-4 rounded-lg shadow-md'
-                  onClick={() => handleCancel(ticket.id)}
+                  onClick={() => handleCancelClick(ticket.id)}
                 >
                   Cancel
                 </button>
                 <button
                   className='bg-[#00ADB5] text-black font-medium text-[16px] py-2 px-4 rounded-lg shadow-md'
-                  onClick={() => handleTransfer(ticket.id)}
+                  onClick={() => handleTransferClick(ticket.id)}
                 >
                   Transfer
                 </button>
@@ -247,6 +286,92 @@ const Tickets = () => {
             </div>
           ))}
         </div>
+        {showCancelForm && (
+          <div className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-50'>
+            <div className='bg-white p-5 rounded-lg shadow-md w-96'>
+              <h2 className='text-[20px] font-bold mb-4'>Cancel Tickets</h2>
+              <form onSubmit={handleCancelSubmit}>
+                <div className='flex items-center mb-4'>
+                  <button
+                    className='bg-gray-300 text-black font-medium text-[16px] py-2 px-4 rounded-lg shadow-md mr-2'
+                    type='button'
+                    onClick={handleDecrement}
+                  >
+                    -
+                  </button>
+                  <input
+                    type='number'
+                    value={cancelTicketCount}
+                    readOnly
+                    className='border p-2 rounded w-20 text-center'
+                  />
+                  <button
+                    className='bg-gray-300 text-black font-medium text-[16px] py-2 px-4 rounded-lg shadow-md ml-2'
+                    type='button'
+                    onClick={handleIncrement}
+                  >
+                    +
+                  </button>
+                </div>
+                <button
+                  className='bg-[#FFC947] text-black font-medium text-[16px] py-2 px-4 rounded-lg shadow-md mr-2'
+                  type='submit'
+                >
+                  Proceed
+                </button>
+                <button
+                  className='bg-gray-500 text-white font-medium text-[16px] py-2 px-4 rounded-lg shadow-md'
+                  type='button'
+                  onClick={() => setShowCancelForm(false)}
+                >
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+        {showTransferForm && (
+          <div className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-50'>
+            <div className='bg-white p-5 rounded-lg shadow-md w-96'>
+              <h2 className='text-[20px] font-bold mb-4'>Transfer Tickets</h2>
+              <form onSubmit={handleTransferSubmit}>
+                <div className='flex flex-col mb-4'>
+                  <label className='mb-2 font-medium'>Number of Tickets</label>
+                  <input
+                    type='number'
+                    value={transferTicketCount}
+                    onChange={(e) => setTransferTicketCount(Number(e.target.value))}
+                    className='border p-2 rounded w-full text-center'
+                    placeholder='Ticket Count'
+                  />
+                </div>
+                <div className='flex flex-col mb-4'>
+                  <label className='mb-2 font-medium'>User Address</label>
+                  <input
+                    type='text'
+                    value={transferUserAddress}
+                    onChange={(e) => setTransferUserAddress(e.target.value)}
+                    className='border p-2 rounded w-full'
+                    placeholder='User Address'
+                  />
+                </div>
+                <button
+                  className='bg-[#00ADB5] text-black font-medium text-[16px] py-2 px-4 rounded-lg shadow-md mr-2'
+                  type='submit'
+                >
+                  Proceed
+                </button>
+                <button
+                  className='bg-gray-500 text-white font-medium text-[16px] py-2 px-4 rounded-lg shadow-md'
+                  type='button'
+                  onClick={() => setShowTransferForm(false)}
+                >
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
