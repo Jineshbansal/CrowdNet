@@ -1,6 +1,6 @@
 #![allow(static_mut_refs)]
 
-use sails_rs::{collections::BTreeMap, collections::HashMap, gstd::msg, prelude::*};
+use sails_rs::{collections::HashMap, gstd::msg, prelude::*};
 
 pub static mut STORAGE: Option<Storage> = None;
 #[derive(Default, Debug, Clone)]
@@ -9,6 +9,7 @@ pub struct Storage {
     pub audience: HashMap<u32, Vec<(ActorId, U256)>>,
     pub admin: Vec<ActorId>,
     pub interactions: HashMap<u32, (u32, Vec<String>)>,
+    pub event_count: u32,
 }
 
 #[derive(Default, Debug, Clone, TypeInfo, Encode, Decode)]
@@ -29,8 +30,16 @@ impl Storage {
         unsafe { &mut STORAGE.as_mut().expect("Not yet initialised").events }
     }
 
+    pub fn get_event_id_count() -> &'static mut u32 {
+        unsafe { &mut STORAGE.as_mut().expect("Not yet initialised").event_count }
+    }
+
     pub fn get_admin() -> &'static mut Vec<ActorId> {
         unsafe { &mut STORAGE.as_mut().expect("Not yet initialised").admin }
+    }
+
+    pub fn get_interactions() -> &'static mut HashMap<u32, (u32, Vec<String>)> {
+        unsafe { &mut STORAGE.as_mut().expect("Not yet initialised").interactions }
     }
 }
 
@@ -46,6 +55,7 @@ impl CommonService {
                 audience: HashMap::new(),
                 admin: vec![admin],
                 interactions: HashMap::new(),
+                event_count: 0,
             })
         }
         Self(())
@@ -102,30 +112,17 @@ impl CommonService {
         true
     }
 
-    pub fn get_likes(&self) -> Vec<(u32, (u32, Vec<String>))> {
+    pub fn get_event_count(&self) -> u32 {
+        self.get().event_count.clone()
+    }
+
+    pub fn get_interactions(&self) -> Vec<(u32, (u32, Vec<String>))> {
         let interactions = self.get().interactions.clone();
         interactions.into_iter().collect()
-    }
-
-    pub fn get_admins(&self) -> Vec<ActorId> {
-        let admins = self.get().admin.clone();
-        admins
-    }
-
-    pub fn get_events_name(&self) -> Vec<(ActorId, Vec<Event>)> {
-        let events: HashMap<ActorId, Vec<Event>> = self.get().events.clone();
-        events.into_iter().collect()
     }
 
     pub fn get_audience(&self) -> Vec<(u32, Vec<(ActorId, U256)>)> {
         let audience = self.get().audience.clone();
         audience.into_iter().collect()
     }
-}
-
-fn convert_to_btree<K, V>(hash_map: HashMap<K, V>) -> BTreeMap<K, V>
-where
-    K: Ord,
-{
-    BTreeMap::from_iter(hash_map.into_iter())
 }

@@ -1,9 +1,13 @@
 use super::{
     audience::AudienceService,
     common::{Event, Storage},
+    funds::FundStorage,
 };
-use funcs::{cancel_event, create_event, update_event};
-use sails_rs::{gstd::msg, prelude::*};
+use funcs::{cancel_event, create_event, finish_event, update_event};
+use sails_rs::{
+    gstd::{exec, msg},
+    prelude::*,
+};
 pub mod funcs;
 
 // Host can create event, update event and cancel event
@@ -51,8 +55,57 @@ impl EventService {
 
     pub fn cancel_event(&mut self, event_id: u32) -> bool {
         let events = Storage::get_events();
+        let audience = Storage::get_audience();
+        let interactions = Storage::get_interactions();
 
+        FundStorage::get_prices().remove_entry(&event_id);
+
+        // Audience and funds
+        if let Some(list) = audience.get_mut(&event_id) {
+            for audience_list in list.iter() {
+                // Turn by turn remove these audiences and refund their money
+
+                self.audience.funds.vft.transfer(
+                    exec::program_id(),
+                    audience_list.0,
+                    audience_list.1,
+                );
+            }
+            list.clear();
+        }
+
+        // Interactions
+        interactions.remove_entry(&event_id);
+
+        // Events
         cancel_event(&msg::source(), event_id, events)
+    }
+
+    pub fn finish_event(&mut self, host_id: ActorId, event_id: u32) -> bool {
+        let events = Storage::get_events();
+        let audience = Storage::get_audience();
+        let interactions = Storage::get_interactions();
+
+        FundStorage::get_prices().remove_entry(&event_id);
+
+        // Audience and funds to host
+        if let Some(list) = audience.get_mut(&event_id) {
+            // turn by turn remove these audiences and send their money
+
+            for audience_list in list.iter() {
+                self.audience
+                    .funds
+                    .vft
+                    .transfer(exec::program_id(), host_id, audience_list.1);
+            }
+            list.clear();
+        }
+
+        // Interactions
+        interactions.remove_entry(&event_id);
+
+        // Events
+        finish_event(&host_id, event_id, events)
     }
 }
 
