@@ -6,7 +6,8 @@ use sails_rs::{
     gstd::{exec, msg},
     prelude::*,
 };
-use vft_service::{Service as VftService, Storage};
+
+use super::vftservice::{Service, Storage};
 
 mod func;
 
@@ -24,7 +25,7 @@ static mut FUND_STORAGE: Option<FundStorage> = None;
 
 #[derive(Clone)]
 pub struct FundService {
-    pub vft: VftService,
+    pub vft: Service,
 }
 
 impl FundStorage {
@@ -52,7 +53,7 @@ impl FundService {
             });
         };
         FundService {
-            vft: <VftService>::seed(name, symbol, decimals),
+            vft: <Service>::seed(name, symbol, decimals),
         }
     }
 
@@ -65,17 +66,17 @@ impl FundService {
     }
 }
 
-impl AsRef<VftService> for FundService {
-    fn as_ref(&self) -> &VftService {
+impl AsRef<Service> for FundService {
+    fn as_ref(&self) -> &Service {
         &self.vft
     }
 }
 
-#[sails_rs::service(extends = VftService)]
+#[sails_rs::service(extends = Service)]
 impl FundService {
     pub fn new() -> Self {
         Self {
-            vft: VftService::new(),
+            vft: Service::new(),
         }
     }
 
@@ -107,17 +108,20 @@ impl FundService {
             .get(&event_id)
             .expect("Event does not exist");
 
-        self.vft
-            .transfer(exec::program_id(), *ticket_price * ticket_count)
+        self.vft.transfer(
+            msg::source(),
+            exec::program_id(),
+            *ticket_price * ticket_count,
+        )
     }
 
     pub fn create_event(&mut self) -> bool {
         self.vft
-            .transfer(exec::program_id(), self.get().onboard_price)
+            .transfer(msg::source(), exec::program_id(), self.get().onboard_price)
     }
 
     pub fn cancel_event(&mut self) -> bool {
         self.vft
-            .transfer(exec::program_id(), self.get().cancel_fine)
+            .transfer(msg::source(), exec::program_id(), self.get().cancel_fine)
     }
 }
