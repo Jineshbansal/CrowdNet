@@ -187,6 +187,7 @@ export const addTokensToVoucher = (
 export const idl = `
 type CommonEvent = struct {
   event_id: u32,
+  name: str,
   venue: str,
   time: str,
   description: str,
@@ -209,7 +210,7 @@ service Common {
 
 service Events {
   CancelEvent : (event_id: u32) -> bool;
-  CreateEvent : (event_details: struct { u32, str, str, str, u256 }) -> bool;
+  CreateEvent : (event_details: struct { u32, str, str, str, str, u256 }) -> bool;
   FinishEvent : (host_id: actor_id, event_id: u32) -> bool;
   CancelAndRefund : (ticket_count: u8, event_id: u32) -> bool;
   PurchaseTicket : (ticket_count: u8, event_id: u32) -> bool;
@@ -218,7 +219,7 @@ service Events {
   Approve : (spender: actor_id, value: u256) -> bool;
   Transfer : (from: actor_id, to: actor_id, value: u256) -> bool;
   TransferFrom : (from: actor_id, to: actor_id, value: u256) -> bool;
-  query UpdateEvent : (event_details: struct { u32, str, str, str, u256 }) -> bool;
+  query UpdateEvent : (event_details: struct { u32, str, str, str, str, u256 }) -> bool;
   query CheckIn : (ticket_count: u8, event_id: u32) -> bool;
   query TransferTicket : (ticket_count: u8, event_id: u32, transfer_id: actor_id) -> bool;
   query GetTicketPrices : () -> vec struct { u32, u256 };
