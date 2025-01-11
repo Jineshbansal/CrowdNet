@@ -173,9 +173,7 @@ const EventsCard = ({ event }: { event: Event }) => {
         console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
         console.log(eventId);
         const transaction = sails.services.Events.functions.PurchaseTicket(
-          null,
-          null,
-          [ticketCount, eventId]
+          ticketCount, eventId
         );
 
         const allAccounts = await web3Accounts();
