@@ -26,7 +26,7 @@ const HostEvent = () => {
   return (
     <>
       <Header />
-      <div className='bg-[#0D1B2A] w-[100vw] h-[100vh] flex flex-col items-center'>
+      <div className='bg-[#0D1B2A] w-full h-full flex flex-col items-center'>
         <h1 className='text-center py-4 text-[#7f2cbb] font-semibold text-5xl'>
           Host an Event
         </h1>
