@@ -171,7 +171,7 @@ const EventsCard = ({ event }: { event: Event }) => {
         sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
         console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
         console.log(eventId);
-        const transaction = sails.services.Events.functions.CreateEvent(
+        const transaction = sails.services.Events.functions.PurchaseTicket(
           null,
           null,
           [ticketCount, eventId]

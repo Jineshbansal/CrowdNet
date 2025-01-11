@@ -56,7 +56,7 @@ export function Header({ isAccountVisible }: Props) {
     };
 
     initialize();
-  }, []);
+  }, [setContractBalance, setTokenBalance]);
 
   return (
     <header className='w-full h-[80px] flex flex-row justify-between items-center bg-[#0D1B2A]'>
