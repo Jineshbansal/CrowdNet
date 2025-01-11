@@ -7,6 +7,13 @@
 
 A decentralized event-hosting platform on the Vara network! Whether you're hosting or attending Web3 or general events, our platform makes it easy to create, join, and interact with events through likes and comments. Say goodbye to high taxes on crypto conversions – we use VFT tokens for all payments, making transactions fast and cost-effective. Join us to experience seamless, engaging events in a decentralized world!
 
+## Getting Started
+To run the application on your localhost use the following commands:
+```
+   yarn
+   yarn run dev
+```
+
 ## Presentation
 PPT: [PPTlink](https://www.canva.com/design/DAGb7R8j43w/cJYLRwOq0jH9VGyLjpgSNg/edit?utm_content=DAGb7R8j43w&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
 
