@@ -40,7 +40,6 @@ pub fn cancel_and_refund(
     } else {
         false
     }
-    // TODO! Refund 80% of the ticket price
 }
 
 pub fn transfer(
