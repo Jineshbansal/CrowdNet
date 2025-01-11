@@ -1,4 +1,4 @@
-# Meet3 
+# CrowdNet
 
 ## Video Demo
 
@@ -11,7 +11,7 @@ A decentralized event-hosting platform on the Vara network! Whether you're hosti
 PPT: 
 
 ## System Design 
-
+![App Architecture](./images/architechture.jpg)
 ## Description 
 
 ### How Vara benefits our platform ? 
