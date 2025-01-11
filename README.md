@@ -9,7 +9,8 @@ A decentralized event-hosting platform on the Vara network! Whether you're hosti
 
 ## Getting Started
 To run the application on your localhost use the following commands:
-```yarn
+```
+   yarn
    yarn run dev
 ```
 
