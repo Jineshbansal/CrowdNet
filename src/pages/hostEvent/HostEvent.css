@@ -1,0 +1,16 @@
+.custom-datetime::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    /* Makes the icon white */
+    cursor: pointer;
+    /* Optional: adds a pointer cursor */
+}
+
+.custom-datetime::-webkit-inner-spin-button {
+    display: none;
+    /* Hides the spinner for a cleaner design */
+}
+
+.custom-datetime::-webkit-clear-button {
+    display: none;
+    /* Hides the clear (X) button */
+}

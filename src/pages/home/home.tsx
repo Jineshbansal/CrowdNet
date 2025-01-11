@@ -4,6 +4,7 @@ import { dAppContext } from '@/Context/dappContext';
 import { useAccount } from '@gear-js/react-hooks';
 import { useSailsCalls } from '@/app/hooks';
 import { useNavigate } from 'react-router-dom';
+import Loader from '@/components/loader/Loader';
 import './examples.css';
 import logo from '../../assets/images/icons/bookitnow.svg';
 
@@ -17,6 +18,7 @@ function Home() {
   const [voucherModeInPolkadotAccount, setVoucherModeInPolkadotAccount] =
     useState(false);
   const [contractState, setContractState] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -27,7 +29,12 @@ function Home() {
       setPageSignlessMode(false);
     }
     if (setCurrentVoucherId) setCurrentVoucherId(null);
+    setLoading(false);
   }, [account]);
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <>

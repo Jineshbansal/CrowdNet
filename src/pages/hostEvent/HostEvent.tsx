@@ -5,6 +5,8 @@ import { Sails } from 'sails-js';
 import { SailsIdlParser } from 'sails-js-parser';
 import { web3FromSource, web3Accounts } from '@polkadot/extension-dapp';
 import { idl } from '@/app/utils';
+import Loader from '@/components/loader/Loader';
+import './HostEvent.css';
 
 const HostEvent = () => {
   const [formData, setFormData] = useState({
@@ -15,6 +17,7 @@ const HostEvent = () => {
     ticket_price: '',
     duration: '',
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -28,6 +31,7 @@ const HostEvent = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
     console.log('Submitted');
 
     const parser = await SailsIdlParser.new();
@@ -87,6 +91,7 @@ const HostEvent = () => {
       } catch (e) {
         console.log('error:', e);
       } finally {
+        setIsLoading(false);
         // Clear form data after submission attempt
         setFormData({
           event_name: '',
@@ -105,6 +110,7 @@ const HostEvent = () => {
   return (
     <>
       <Header />
+
       <div className='bg-[#0D1B2A] w-full min-h-screen flex flex-col items-center'>
         <h1 className='text-center py-4 text-[#7f2cbb] font-semibold text-5xl'>
           Host an Event
@@ -140,7 +146,7 @@ const HostEvent = () => {
                 type='datetime-local'
                 id='event_date'
                 name='event_date'
-                className='border border-[#00ADB5] rounded-lg bg-[#0D1B2A] my-1 text-white py-2 px-3 outline-none'
+                className='border border-[#00ADB5] rounded-lg bg-[#0D1B2A] my-1 text-white py-2 px-3 outline-none appearance-none custom-datetime'
                 onChange={handleChange}
               />
             </div>
@@ -197,7 +203,7 @@ const HostEvent = () => {
                 Duration
               </label>
               <input
-                type='text'
+                type='number'
                 id='duration'
                 name='duration'
                 className='border border-[#00ADB5] rounded-lg bg-[#0D1B2A] my-1 text-white py-2 px-3 outline-none'
@@ -206,8 +212,18 @@ const HostEvent = () => {
             </div>
           </div>
           <div className='flex justify-center my-5'>
-            <button className='px-5 py-3 font-bold text-[#0D1B2A] rounded-lg bg-[#14FF9E] hover:bg-[#12e08c] transition duration-300'>
-              Submit
+            <button
+              className='px-5 py-3 font-bold text-[#0D1B2A] rounded-lg bg-[#14FF9E] hover:bg-[#12e08c] transition duration-300 flex items-center'
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className='flex items-center'>
+                  <Loader />
+                  <span className='ml-2'>Submitting...</span>
+                </div>
+              ) : (
+                'Submit'
+              )}
             </button>
           </div>
         </form>
