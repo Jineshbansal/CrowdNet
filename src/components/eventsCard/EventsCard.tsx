@@ -7,7 +7,7 @@ import { SailsIdlParser } from 'sails-js-parser';
 import { web3FromSource, web3Accounts } from '@polkadot/extension-dapp';
 import { idl } from '@/app/utils';
 
-const EventsCard = () => {
+const EventsCard = ({event}) => {
   const [showForm, setShowForm] = useState(false);
   const [ticketCount, setTicketCount] = useState(1);
   const [showDetails, setShowDetails] = useState(false);

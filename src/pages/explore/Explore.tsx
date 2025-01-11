@@ -7,8 +7,11 @@ import { SailsIdlParser } from 'sails-js-parser';
 import { Keyring } from '@polkadot/api';
 import { WsProvider } from '@polkadot/api';
 import { idl } from '@/app/utils';
+import {useState} from 'react';
+import { set } from 'react-hook-form';
 
 const Explore = () => {
+  const [transaction, setTransaction] = useState<any>(null);
   useEffect(() => {
     const initialize = async () => {
       const parser = await SailsIdlParser.new();
@@ -25,9 +28,10 @@ const Explore = () => {
           sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
           console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
           const alice = 'kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW';
-          const transaction = await sails.services.Common.queries.DisplayEvents(
+          const transaction:unknown = await sails.services.Common.queries.DisplayEvents(
             alice
           );
+          setTransaction(transaction);
 
           console.log('Transaction:', transaction);
         } catch (e) {
@@ -59,12 +63,9 @@ const Explore = () => {
           </div>
         </div>
         <div className='events grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4'>
-          <EventsCard />
-          <EventsCard />
-          <EventsCard />
-          <EventsCard />
-          <EventsCard />
-          <EventsCard />
+          {transaction?.map((event: any) => (
+            <EventsCard event={event} key={event.id} />
+          ))}
         </div>
       </div>
     </>
