@@ -1,6 +1,6 @@
 use sails_rs::collections::HashMap;
 use sails_rs::prelude::*;
-
+use sails_rs::gstd::exec;
 use crate::services::common::{Event, Storage};
 use crate::services::funds::FundStorage;
 
@@ -71,10 +71,15 @@ pub fn finish_event(
 ) -> bool {
     // Transfer all the money in the host's account
     // purge audience and interactions
-
+    
     if let Some(list) = events.get_mut(host_id) {
         for (index, list_event) in list.iter().enumerate() {
             if list_event.event_id == event_id {
+                let currtime=exec::block_timestamp();
+                if (currtime-list_event.start_time) < list_event.time {
+                    return false;
+                }
+                
                 list.remove(index);
                 let ticket_prices = FundStorage::get_prices();
                 ticket_prices.remove(&event_id);

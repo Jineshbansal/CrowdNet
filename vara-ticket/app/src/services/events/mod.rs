@@ -28,16 +28,17 @@ impl EventService {
 
     pub fn create_event(
         &mut self,
-        event_details: (u32, String, String, String, String, U256),
+        event_details: (u32, u64, u64, String,String, String, U256),
     ) -> bool {
         let events = Storage::get_events();
         let event = Event {
             event_id: event_details.0,
-            name: event_details.1,
-            venue: event_details.2,
-            time: event_details.3,
-            description: event_details.4,
-            initial_price: event_details.5,
+            time: event_details.1,
+            start_time:event_details.2,
+            name: event_details.3,
+            venue: event_details.4,
+            description: event_details.5,
+            initial_price: event_details.6,
         };
         create_event(&msg::source(), event, events);
 
@@ -46,16 +47,17 @@ impl EventService {
 
     pub fn update_event(
         &mut self,
-        event_details: (u32, String, String, String, String, U256),
+        event_details: (u32, u64,u64, String, String, String, U256),
     ) -> bool {
         let events = Storage::get_events();
         let new_event = Event {
             event_id: event_details.0,
-            name: event_details.1,
-            venue: event_details.2,
-            time: event_details.3,
-            description: event_details.4,
-            initial_price: event_details.5,
+            time: event_details.1,
+            start_time:event_details.2,
+            name: event_details.3,
+            venue: event_details.4,
+            description: event_details.5,
+            initial_price: event_details.6,
         };
 
         update_event(&msg::source(), new_event, events)
@@ -91,7 +93,7 @@ impl EventService {
         self.audience.funds.cancel_event()
     }
 
-    pub fn finish_event(&mut self, host_id: ActorId, event_id: u32) -> bool {
+    pub fn finish_event(&mut self, event_id: u32) -> bool {
         let events = Storage::get_events();
         let audience = Storage::get_audience();
         let interactions = Storage::get_interactions();
@@ -106,7 +108,7 @@ impl EventService {
                 self.audience
                     .funds
                     .vft
-                    .transfer(exec::program_id(), host_id, audience_list.1);
+                    .transfer(exec::program_id(), msg::source(), audience_list.1);
             }
             list.clear();
         }
@@ -115,7 +117,7 @@ impl EventService {
         interactions.remove_entry(&event_id);
 
         // Events
-        finish_event(&host_id, event_id, events)
+        finish_event(&msg::source(), event_id, events)
     }
 }
 

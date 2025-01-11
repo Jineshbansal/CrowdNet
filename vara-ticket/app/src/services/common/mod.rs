@@ -17,7 +17,8 @@ pub struct Event {
     pub event_id: u32,
     pub name: String,
     pub venue: String,
-    pub time: String,
+    pub time: u64,
+    pub start_time:u64,
     pub description: String,
     pub initial_price: U256,
 }
