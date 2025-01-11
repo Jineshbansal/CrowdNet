@@ -1,10 +1,10 @@
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { Home } from './home';
-import { Landing } from './Landing';
 import { NotFound } from './not-found';
 import path from 'path';
 import { HostEvent } from './hostEvent';
 import { Explore } from './explore';
+import { Tickets } from './tickets';
 
 const routes = [
   { path: '/', Page: Home },
@@ -12,6 +12,7 @@ const routes = [
   { path: '/home', Page: Home },
   { path: '/explore', Page: Explore },
   { path: '/*', Page: NotFound },
+  { path: '/tickets', Page: Tickets },
 ];
 
 function Routing() {
