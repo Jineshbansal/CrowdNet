@@ -7,7 +7,16 @@ import { SailsIdlParser } from 'sails-js-parser';
 import { web3FromSource, web3Accounts } from '@polkadot/extension-dapp';
 import { idl } from '@/app/utils';
 
-const EventsCard = ({event}) => {
+interface Event {
+  event_id: number;
+  name: string;
+  venue: string;
+  time: string;
+  description: string;
+  intitial_price: number;
+}
+
+const EventsCard = ({ event }: { event: Event }) => {
   const [showForm, setShowForm] = useState(false);
   const [ticketCount, setTicketCount] = useState(1);
   const [showDetails, setShowDetails] = useState(false);
@@ -106,7 +115,7 @@ const EventsCard = ({event}) => {
   };
 
   return (
-    <div className='relative' key='event.id' id='event.id'>
+    <div className='relative' key={event.event_id} id='event.id'>
       <div className='bg-[#6a0dad] text-white p-6 rounded-lg shadow-lg max-w-sm mx-auto transition-transform transform hover:scale-105'>
         <img
           src={eventPic}
@@ -114,23 +123,20 @@ const EventsCard = ({event}) => {
           className='w-full h-48 object-cover rounded-t-lg mb-4'
         />
         <h1 className='text-2xl font-bold mb-2 border-b-2 border-white pb-2'>
-          Event Name
+          {event.name}
         </h1>
-        <p className='mb-4'>
-          This is a brief description of the event. It provides an overview of
-          what to expect.
-        </p>
+        <p className='mb-4'>{event.description}</p>
         <div className='flex justify-between mb-2'>
           <p>
-            <strong>Place:</strong> Event Location
+            <strong>Place:</strong> {event.venue}
           </p>
           <p>
-            <strong>Time:</strong> Event Time
+            <strong>Time:</strong> {event.time}
           </p>
         </div>
         <div className='flex justify-between mb-4'>
           <p>
-            <strong>Price:</strong> $50
+            <strong>Price:</strong> {event.initial_price}
           </p>
         </div>
         <div className='flex justify-between items-center'>
@@ -225,7 +231,9 @@ const EventsCard = ({event}) => {
               </p>
             </div>
             <div className='w-1/4 pl-4 border-l border-gray-200'>
-              <h3 className='text-xl font-bold mb-4 text-[#6a0dad]'>Likes & Comments</h3>
+              <h3 className='text-xl font-bold mb-4 text-[#6a0dad]'>
+                Likes & Comments
+              </h3>
               <div className='mb-4 flex items-center'>
                 <FaThumbsUp className='text-[#6a0dad] mr-2' />
                 <span className='text-lg font-bold mr-2'>Likes:</span>
@@ -244,7 +252,10 @@ const EventsCard = ({event}) => {
                 <strong>Comments:</strong>
                 <ul className='list-disc list-inside mt-2'>
                   {comments.map((comment) => (
-                    <li key={comment.id} className='mb-2 text-lg bg-gray-100 p-2 rounded-lg shadow-sm'>
+                    <li
+                      key={comment.id}
+                      className='mb-2 text-lg bg-gray-100 p-2 rounded-lg shadow-sm'
+                    >
                       {comment.text}
                     </li>
                   ))}

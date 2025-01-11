@@ -44,17 +44,14 @@ const HostEvent = () => {
         sails.setApi(gearApi);
         sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
         console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
-        const transaction = sails.services.Events.functions.CreateEvent(
-          null,
-          null,
-          [
-            1,
-            formData.event_name,
-            formData.event_date,
-            formData.event_description,
-            BigInt(formData.ticket_price),
-          ]
-        );
+        const transaction = sails.services.Events.functions.CreateEvent([
+          5,
+          formData.event_name,
+          formData.event_venue,
+          formData.event_date,
+          formData.event_description,
+          BigInt(formData.ticket_price),
+        ]);
 
         const allAccounts = await web3Accounts();
         const account = allAccounts[0];
@@ -82,7 +79,10 @@ const HostEvent = () => {
         } catch (error) {
           console.error('Error executing message:', error);
         }
-        // Clear form data after successful submission
+      } catch (e) {
+        console.log('error:', e);
+      } finally {
+        // Clear form data after submission attempt
         setFormData({
           event_name: '',
           event_date: '',
@@ -90,8 +90,6 @@ const HostEvent = () => {
           event_venue: '',
           ticket_price: '',
         });
-      } catch (e) {
-        console.log('error:', e);
       }
     }
 

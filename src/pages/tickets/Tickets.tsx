@@ -24,8 +24,6 @@ const Tickets = () => {
 
   const handleCancel = (id) => {
     // Handle cancel ticket
-    const parser = await SailsIdlParser.new();
-    const sails = new Sails(parser);
   };
 
   const handleTransfer = (id) => {

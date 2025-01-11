@@ -4,14 +4,11 @@ import { useEffect } from 'react';
 import { GearApi } from '@gear-js/api';
 import { Sails } from 'sails-js';
 import { SailsIdlParser } from 'sails-js-parser';
-import { Keyring } from '@polkadot/api';
-import { WsProvider } from '@polkadot/api';
 import { idl } from '@/app/utils';
-import {useState} from 'react';
-import { set } from 'react-hook-form';
+import { useState } from 'react';
 
 const Explore = () => {
-  const [transaction, setTransaction] = useState<any>(null);
+  const [events, setEvents] = useState<any>([]);
   useEffect(() => {
     const initialize = async () => {
       const parser = await SailsIdlParser.new();
@@ -28,11 +25,13 @@ const Explore = () => {
           sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
           console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
           const alice = 'kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW';
-          const transaction:unknown = await sails.services.Common.queries.DisplayEvents(
-            alice
-          );
-          setTransaction(transaction);
+          const transaction: any =
+            await sails.services.Common.queries.DisplayEvents(alice);
 
+          const eventsData = transaction.flatMap((tx: any) => tx[1]);
+          setEvents(eventsData);
+
+          console.log(eventsData);
           console.log('Transaction:', transaction);
         } catch (e) {
           console.log('error:', e);
@@ -63,8 +62,8 @@ const Explore = () => {
           </div>
         </div>
         <div className='events grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4'>
-          {transaction?.map((event: any) => (
-            <EventsCard event={event} key={event.id} />
+          {events?.map((event: any) => (
+            <EventsCard event={event} key={event.event_id} />
           ))}
         </div>
       </div>
