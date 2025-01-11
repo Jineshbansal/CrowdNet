@@ -48,14 +48,16 @@ const HostEvent = () => {
           alice
         );
         console.log(eventCount);
+        console.log('Event Count:', formData.event_date);
+        console.log('Event Count:', formData.duration);
         const transaction = sails.services.Events.functions.CreateEvent([
           eventCount,
+          formData.duration,
+          BigInt(Math.floor(new Date(formData.event_date).getTime() / 1000)),
           formData.event_name,
           formData.event_venue,
-          formData.event_date,
           formData.event_description,
           BigInt(formData.ticket_price),
-          formData.duration,
         ]);
 
         const allAccounts = await web3Accounts();
@@ -197,7 +199,7 @@ const HostEvent = () => {
                 Duration
               </label>
               <input
-                type='text'
+                type='number'
                 id='duration'
                 name='duration'
                 className='border border-[#00ADB5] rounded-lg bg-[#0D1B2A] my-1 text-white py-2 px-3 outline-none'
