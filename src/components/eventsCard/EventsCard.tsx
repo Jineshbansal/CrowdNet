@@ -12,10 +12,10 @@ interface Event {
   event_id: number;
   name: string;
   venue: string;
-  time: string;
+  start_time: string;
   description: string;
   initial_price: number;
-  duration: number;
+  time: number;
 }
 
 const EventsCard = ({ event }: { event: Event }) => {
@@ -31,7 +31,14 @@ const EventsCard = ({ event }: { event: Event }) => {
   ]);
   const [newComment, setNewComment] = useState('');
 
-  const formattedTime = new Date(event.time).toLocaleString();
+  const formattedTime = new Date(event.start_time).toLocaleString('en-US', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true,
+  });
 
   const handleBookClick = () => {
     setShowForm(true);
