@@ -3,8 +3,6 @@ import React, { useState } from 'react';
 import { GearApi } from '@gear-js/api';
 import { Sails } from 'sails-js';
 import { SailsIdlParser } from 'sails-js-parser';
-import { Keyring } from '@polkadot/api';
-import { WsProvider } from '@polkadot/api';
 import { web3FromSource, web3Accounts } from '@polkadot/extension-dapp';
 import { idl } from '@/app/utils';
 
