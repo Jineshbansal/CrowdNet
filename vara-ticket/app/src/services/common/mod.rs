@@ -15,7 +15,7 @@ pub struct Storage {
 #[derive(Default, Debug, Clone, TypeInfo, Encode, Decode)]
 pub struct Event {
     pub event_id: u32,
-    pub name:String,
+    pub name: String,
     pub venue: String,
     pub time: String,
     pub description: String,
@@ -126,21 +126,18 @@ impl CommonService {
     pub fn interact_like(&mut self, event_id: u32) -> bool {
         self.get_mut()
             .interactions
-            .get_mut(&event_id)
-            .unwrap()
-            .0
-            .checked_add(1)
-            .expect("Overflow occured");
+            .entry(event_id)
+            .and_modify(|x| x.0 += 1)
+            .or_insert((1, vec![]));
         true
     }
 
     pub fn interact_comment(&mut self, event_id: u32, comment: String) -> bool {
         self.get_mut()
             .interactions
-            .get_mut(&event_id)
-            .unwrap()
-            .1
-            .push(comment);
+            .entry(event_id)
+            .and_modify(|x| x.1.push(comment.clone()))
+            .or_insert((0, vec![comment]));
         true
     }
 
