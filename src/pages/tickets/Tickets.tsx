@@ -38,7 +38,7 @@ const Tickets = () => {
     sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
     console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
     const transaction = sails.services.Events.functions.CancelAndRefund(
-      ticketsNum
+      ticketsNum,id
     );
 
     const allAccounts = await web3Accounts();
@@ -69,12 +69,91 @@ const Tickets = () => {
     }
   };
 
-  const handleTransfer = (id) => {
+  const handleTransfer = async (ticket_count,event_id,transfer_id) => {
     // Handle transfer ticket
+    const parser = await SailsIdlParser.new();
+    const sails = new Sails(parser);
+    sails.parseIdl(idl);
+    const gearApi = await GearApi.create({
+              providerAddress: 'wss://testnet.vara.network',
+            });
+    sails.setApi(gearApi);
+    sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
+    console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
+    const transaction = sails.services.Events.functions.CancelAndRefund(
+      ticket_count,event_id,transfer_id
+    );
+
+    const allAccounts = await web3Accounts();
+    const account = allAccounts[0];
+    const injector = await web3FromSource(account.meta.source);
+    transaction.withAccount(account.address, { signer: injector.signer });
+
+    transaction.withGas(100_000_000_000n);
+    const fee = await transaction.transactionFee();
+    console.log('Transaction fee:', fee.toString());
+    const { msgId, blockHash, txHash, response, isFinalized } =
+      await transaction.signAndSend();
+
+    console.log('Message ID:', msgId);
+    console.log('Transaction hash:', txHash);
+    console.log('Block hash:', blockHash);
+
+    // Check if the transaction is finalized
+    const finalized = await isFinalized;
+    console.log('Is finalized:', finalized);
+
+    // Get the response from the program
+    try {
+      const result = await response();
+      console.log('Program response:', result);
+    } catch (error) {
+      console.error('Error executing message:', error);
+    }
   };
 
-  const handleCheckIn = (id) => {
+  const handleCheckIn =async (ticket_count,event_id) => {
     // Handle check-in ticket
+    // Handle transfer ticket
+    const parser = await SailsIdlParser.new();
+    const sails = new Sails(parser);
+    sails.parseIdl(idl);
+    const gearApi = await GearApi.create({
+              providerAddress: 'wss://testnet.vara.network',
+            });
+    sails.setApi(gearApi);
+    sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
+    console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
+    const transaction = sails.services.Events.functions.CheckIn(
+      ticket_count,event_id
+    );
+
+    const allAccounts = await web3Accounts();
+    const account = allAccounts[0];
+    const injector = await web3FromSource(account.meta.source);
+    transaction.withAccount(account.address, { signer: injector.signer });
+
+    transaction.withGas(100_000_000_000n);
+    const fee = await transaction.transactionFee();
+    console.log('Transaction fee:', fee.toString());
+    const { msgId, blockHash, txHash, response, isFinalized } =
+      await transaction.signAndSend();
+
+    console.log('Message ID:', msgId);
+    console.log('Transaction hash:', txHash);
+    console.log('Block hash:', blockHash);
+
+    // Check if the transaction is finalized
+    const finalized = await isFinalized;
+    console.log('Is finalized:', finalized);
+
+    // Get the response from the program
+    try {
+      const result = await response();
+      console.log('Program response:', result);
+    } catch (error) {
+      console.error('Error executing message:', error);
+    }
   };
 
   return (
