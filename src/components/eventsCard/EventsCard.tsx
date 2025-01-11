@@ -7,6 +7,7 @@ import { SailsIdlParser } from 'sails-js-parser';
 import { web3FromSource, web3Accounts } from '@polkadot/extension-dapp';
 import { idl } from '@/app/utils';
 import { useEffect } from 'react';
+import { set } from 'react-hook-form';
 
 interface Event {
   event_id: number;
@@ -22,10 +23,10 @@ const EventsCard = ({ event }: { event: Event }) => {
   const [showForm, setShowForm] = useState(false);
   const [ticketCount, setTicketCount] = useState(1);
   const [showDetails, setShowDetails] = useState(false);
-  const ticketPrice = 50;
   const [likes, setLikes] = useState(0);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [counter, setCounter] = useState(0);
 
   const formattedTime = new Date(
     Number(event.start_time) * 1000
@@ -213,6 +214,66 @@ const EventsCard = ({ event }: { event: Event }) => {
     setShowForm(false);
   };
 
+  const handleCancelEvent = async (eventId: number) => {
+    const parser = await SailsIdlParser.new();
+    const sails = new Sails(parser);
+
+    async function State() {
+      console.log('hello');
+      try {
+        sails.parseIdl(idl);
+        const gearApi = await GearApi.create({
+          providerAddress: 'wss://testnet.vara.network',
+        });
+        sails.setApi(gearApi);
+        sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
+        console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
+        const alice = 'kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW';
+        const eventCount = await sails.services.Common.queries.GetEventCount(
+          alice
+        );
+        console.log(eventCount);
+        const transaction = sails.services.Events.functions.CancelEvent([
+          eventId,
+        ]);
+
+        const allAccounts = await web3Accounts();
+        const account = allAccounts[0];
+        const injector = await web3FromSource(account.meta.source);
+        transaction.withAccount(account.address, { signer: injector.signer });
+
+        transaction.withGas(100_000_000_000n);
+        const fee = await transaction.transactionFee();
+        console.log('Transaction fee:', fee.toString());
+        const { msgId, blockHash, txHash, response, isFinalized } =
+          await transaction.signAndSend();
+
+        console.log('Message ID:', msgId);
+        console.log('Transaction hash:', txHash);
+        console.log('Block hash:', blockHash);
+
+        // Check if the transaction is finalized
+        const finalized = await isFinalized;
+        console.log('Is finalized:', finalized);
+
+        // Get the response from the program
+        try {
+          const result = await response();
+          console.log('Program response:', result);
+        } catch (error) {
+          console.error('Error executing message:', error);
+        }
+      } catch (e) {
+        console.log('error:', e);
+      } finally {
+        setShowDetails(false);
+        setCounter(counter + 1);
+      }
+    }
+
+    State();
+  };
+
   useEffect(() => {
     const initialize = async () => {
       const parser = await SailsIdlParser.new();
@@ -252,7 +313,7 @@ const EventsCard = ({ event }: { event: Event }) => {
     };
 
     initialize();
-  }, [event.event_id, likes, comments]);
+  }, [event.event_id, likes, comments, counter]);
 
   return (
     <div className='relative' key={event.event_id} id='event.id'>
@@ -324,7 +385,8 @@ const EventsCard = ({ event }: { event: Event }) => {
                 </button>
               </div>
               <p className='mb-4'>
-                <strong>Total Price:</strong> ${ticketCount * ticketPrice}
+                <strong>Total Price:</strong> $
+                {ticketCount * event.initial_price}
               </p>
               <button
                 type='submit'
@@ -438,6 +500,14 @@ const EventsCard = ({ event }: { event: Event }) => {
                     </form>
                   </div>
                 </div>
+              </div>
+              <div className='absolute bottom-4 right-4'>
+                <button
+                  className='bg-red-600 text-white font-bold py-2 px-4 rounded hover:bg-red-700 transition-colors'
+                  onClick={() => handleCancelEvent(event.event_id)}
+                >
+                  Cancel Event
+                </button>
               </div>
             </div>
           </div>

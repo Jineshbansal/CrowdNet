@@ -61,9 +61,9 @@ export function Header({ isAccountVisible }: Props) {
   return (
     <header className='w-full h-[80px] flex flex-row justify-between items-center bg-[#0D1B2A]'>
       <div className='left flex items-center text-[#00adb5] gap-5 pl-8'>
-        <img src={logo} alt='bookitnow' />
+        <img src={logo} alt='CrowdNet' />
         <Link to='/' className='text-[28px]'>
-          BookItNow
+          CrowdNet
         </Link>
       </div>
       <div className='flex items-center gap-8 pr-8'>

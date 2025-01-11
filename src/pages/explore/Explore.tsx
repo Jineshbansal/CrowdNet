@@ -10,6 +10,7 @@ import Loader from '@/components/loader/Loader';
 const Explore = () => {
   const [events, setEvents] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>(''); // Add search query state
 
   useEffect(() => {
     const initialize = async () => {
@@ -46,7 +47,13 @@ const Explore = () => {
     };
 
     initialize();
-  }, []);
+  }, [events]);
+
+  const filteredEvents = events.filter(
+    (event: any) =>
+      event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      event.venue.toLowerCase().includes(searchQuery.toLowerCase())
+  ); // Filter events based on search query
 
   return (
     <>
@@ -62,14 +69,16 @@ const Explore = () => {
               type='text'
               placeholder='Search by name, venue'
               className='bg-transparent outline-none text-white placeholder:text-purple-500 placeholder:opacity-80 flex-1'
+              value={searchQuery} // Bind input value to search query state
+              onChange={(e) => setSearchQuery(e.target.value)} // Update search query state on input change
             />
           </div>
         </div>
         <div className='events grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4'>
           {loading ? (
             <Loader />
-          ) : events.length > 0 ? (
-            events.map((event: any) => (
+          ) : filteredEvents.length > 0 ? ( // Use filtered events instead of all events
+            filteredEvents.map((event: any) => (
               <EventsCard event={event} key={event.event_id} />
             ))
           ) : (

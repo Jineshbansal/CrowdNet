@@ -5,6 +5,8 @@ import { GearApi } from '@gear-js/api';
 import { Sails } from 'sails-js';
 import { SailsIdlParser } from 'sails-js-parser';
 import { idl } from '@/app/utils';
+import Loader from '@/components/loader/Loader'; // Import Loader
+
 const Tickets = () => {
   interface Ticket {
     id: string;
@@ -22,6 +24,7 @@ const Tickets = () => {
   const [transferTicketCount, setTransferTicketCount] = useState(0);
   const [transferUserAddress, setTransferUserAddress] = useState('');
   const [selectedTransferTicketId, setSelectedTransferTicketId] = useState('');
+  const [loading, setLoading] = useState(true); // Add loading state
 
   const handleIncrement = () => {
     setCancelTicketCount((prevCount) => prevCount + 1);
@@ -78,6 +81,7 @@ const Tickets = () => {
       }
 
       State();
+      setLoading(false); // Set loading to false after fetching tickets
     };
 
     initialize();
@@ -248,44 +252,48 @@ const Tickets = () => {
         <h1 className='text-[#00ADB5] text-[45px] font-bold mb-10'>
           My Tickets
         </h1>
-        <div className='w-full flex flex-col gap-5'>
-          {tickets.map((ticket) => (
-            <div
-              key={ticket.id}
-              className='ticket-card flex justify-between items-center bg-[#222831] text-white p-5 rounded-lg shadow-md'
-            >
-              <div>
-                <p className='text-[25px] font-bold'>{ticket.eventName}</p>
-                <p className='text-[18px]'>{ticket.place}</p>
-                <p className='text-[18px]'>{ticket.time}</p>
-                <p className='text-[18px]'>
-                  Total Tickets: {ticket.ticketCount}
-                </p>{' '}
-                {/* Display ticket count */}
+        {loading ? ( // Show loader while loading
+          <Loader />
+        ) : (
+          <div className='w-full flex flex-col gap-5'>
+            {tickets.map((ticket) => (
+              <div
+                key={ticket.id}
+                className='ticket-card flex justify-between items-center bg-[#222831] text-white p-5 rounded-lg shadow-md'
+              >
+                <div>
+                  <p className='text-[25px] font-bold'>{ticket.eventName}</p>
+                  <p className='text-[18px]'>{ticket.place}</p>
+                  <p className='text-[18px]'>{ticket.time}</p>
+                  <p className='text-[18px]'>
+                    Total Tickets: {ticket.ticketCount}
+                  </p>{' '}
+                  {/* Display ticket count */}
+                </div>
+                <div className='flex gap-3'>
+                  <button
+                    className='bg-[#FFC947] text-black font-medium text-[16px] py-2 px-4 rounded-lg shadow-md'
+                    onClick={() => handleCancelClick(ticket.id)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className='bg-[#00ADB5] text-black font-medium text-[16px] py-2 px-4 rounded-lg shadow-md'
+                    onClick={() => handleTransferClick(ticket.id)}
+                  >
+                    Transfer
+                  </button>
+                  <button
+                    className='bg-[#6A0DAD] text-white font-medium text-[16px] py-2 px-4 rounded-lg shadow-md'
+                    onClick={() => handleCheckIn(ticket.id)}
+                  >
+                    Check-in
+                  </button>
+                </div>
               </div>
-              <div className='flex gap-3'>
-                <button
-                  className='bg-[#FFC947] text-black font-medium text-[16px] py-2 px-4 rounded-lg shadow-md'
-                  onClick={() => handleCancelClick(ticket.id)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className='bg-[#00ADB5] text-black font-medium text-[16px] py-2 px-4 rounded-lg shadow-md'
-                  onClick={() => handleTransferClick(ticket.id)}
-                >
-                  Transfer
-                </button>
-                <button
-                  className='bg-[#6A0DAD] text-white font-medium text-[16px] py-2 px-4 rounded-lg shadow-md'
-                  onClick={() => handleCheckIn(ticket.id)}
-                >
-                  Check-in
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
         {showCancelForm && (
           <div className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-50'>
             <div className='bg-white p-5 rounded-lg shadow-md w-96'>

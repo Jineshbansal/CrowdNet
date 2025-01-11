@@ -48,7 +48,7 @@ function Home() {
               in Events Seamlessly
             </p>
             <p className='text-[#6A0DAD] text-[65px] font-bold'>
-              with BookItNow
+              with CrowdNet
             </p>
             <p className='text-[#00ADB5] text-[30px] text-center pt-5 font-bold'>
               Secure. Transparent. Decentralized.
@@ -70,7 +70,7 @@ function Home() {
           </div>
         </div>
         <div className='right h-full w-1/4 flex justify-center items-center mr-5'>
-          <img src={logo} className='h-[400px] w-[400px]' alt='bookitnow' />
+          <img src={logo} className='h-[400px] w-[400px]' alt='crowdnet' />
         </div>
       </div>
     </>
