@@ -48,11 +48,14 @@ const Tickets = () => {
           });
           sails.setApi(gearApi);
           sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
+          const allAccounts = await web3Accounts();
+          const account = allAccounts[0];
           console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
           const alice = 'kGg5hTfRcyaYX6wUdpNi7hpbYLQPGdF85q96fGn21w6pkJu4w';
           const myEvents = (await sails.services.Common.queries.GetMyEvents(
-            alice
+            account.address
           )) as any[];
+          console.log('myaddress', account.address);
 
           console.log(myEvents);
           const formattedTickets = myEvents.map((event) => {
@@ -239,9 +242,15 @@ const Tickets = () => {
     setShowCancelForm(false);
   };
 
-  const handleTransferSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleTransferSubmit = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
-    await handleTransfer(transferTicketCount, selectedTransferTicketId, transferUserAddress);
+    await handleTransfer(
+      transferTicketCount,
+      selectedTransferTicketId,
+      transferUserAddress
+    );
     setShowTransferForm(false);
   };
 
@@ -348,7 +357,9 @@ const Tickets = () => {
                   <input
                     type='number'
                     value={transferTicketCount}
-                    onChange={(e) => setTransferTicketCount(Number(e.target.value))}
+                    onChange={(e) =>
+                      setTransferTicketCount(Number(e.target.value))
+                    }
                     className='border p-2 rounded w-full text-center'
                     placeholder='Ticket Count'
                   />

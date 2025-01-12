@@ -8,6 +8,7 @@ import { Sails } from 'sails-js';
 import { SailsIdlParser } from 'sails-js-parser';
 import { idl } from '@/app/utils';
 import Loader from '@/components/loader/Loader';
+import { web3FromSource, web3Accounts } from '@polkadot/extension-dapp';
 
 interface Props {
   isAccountVisible: boolean;
@@ -35,15 +36,22 @@ export function Header({ isAccountVisible }: Props) {
           sails.setApi(gearApi);
           sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
           console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
+
+          const allAccounts = await web3Accounts();
+          const account = allAccounts[0];
           const alice = 'kGg5hTfRcyaYX6wUdpNi7hpbYLQPGdF85q96fGn21w6pkJu4w';
           const contractBalanceShow: any =
             await sails.services.Events.queries.GetContractBalance(
-              alice,
+              account.address,
               null,
               null
             );
           const tokenBalanceShow: any =
-            await sails.services.Events.queries.GetMyBalance(alice, null, null);
+            await sails.services.Events.queries.GetMyBalance(
+              account.address,
+              null,
+              null
+            );
 
           setContractBalance(parseInt(contractBalanceShow.toString(), 16));
           setTokenBalance(parseInt(tokenBalanceShow.toString(), 16));
