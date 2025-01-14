@@ -8,6 +8,7 @@ import { useInitSails } from './app/hooks';
 import { CONTRACT_DATA, sponsorName, sponsorMnemonic } from './app/consts';
 import '@gear-js/vara-ui/dist/style.css';
 import './index.css';
+import { Toaster } from 'react-hot-toast';
 
 function Component() {
   const { isApiReady } = useApi();
@@ -34,6 +35,7 @@ function Component() {
     <>
       <div className='App w-[100vw] h-[100vh] absolute overflow-x-hidden overflow-y-scroll no-scrollbar'>
         <Routing />
+        <Toaster />
       </div>
     </>
   );

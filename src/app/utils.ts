@@ -1,6 +1,10 @@
 import { AlertContainerFactory, withoutCommas } from '@gear-js/react-hooks';
 import { HexString } from '@polkadot/util/types';
 import SailsCalls, { SailsCallbacks } from '@/app/SailsCalls';
+import { GearApi } from '@gear-js/api';
+import { Sails } from 'sails-js';
+import { toast } from 'react-hot-toast';
+import { web3FromSource, web3Accounts } from '@polkadot/extension-dapp';
 
 export function formatDate(input: string | number): string {
   const date = new Date(input);
@@ -238,5 +242,59 @@ service Events {
     Approval: struct { owner: actor_id, spender: actor_id, value: u256 };
     Transfer: struct { from: actor_id, to: actor_id, value: u256 };
   }
+};`;
+
+export async function initializeSails(sails: Sails) {
+  const name = 'Common';
+  sails.parseIdl(idl);
+  const gearApi = await GearApi.create({
+    providerAddress: 'wss://testnet.vara.network',
+  });
+  sails.setApi(gearApi);
+  sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
+}
+
+export async function executeTransaction(
+  transaction: any,
+  success_message: string,
+  error_message: string
+) {
+  try {
+    const allAccounts = await web3Accounts();
+    const account = allAccounts[0];
+    const injector = await web3FromSource(account.meta.source);
+    transaction.withAccount(account.address, { signer: injector.signer });
+
+    transaction.withGas(100_000_000_000n);
+    const fee = await transaction.transactionFee();
+    console.log('Transaction fee:', fee.toString());
+    const { msgId, blockHash, txHash, response, isFinalized } =
+      await transaction.signAndSend();
+
+    console.log('Message ID:', msgId);
+    console.log('Transaction hash:', txHash);
+    console.log('Block hash:', blockHash);
+
+    const finalized = await isFinalized;
+    console.log('Is finalized:', finalized);
+
+    const result = await response();
+    if (result) {
+      toast.success(success_message);
+    } else {
+      console.log('Error:', result);
+      toast.error(error_message);
+    }
+  } catch (error) {
+    console.log(error);
+    toast.error(error_message);
+  }
+}
+
+export const alice = 'kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW';
+
+export const getAccountAddress = async () => {
+  const allAccounts = await web3Accounts();
+  const account = allAccounts[0];
+  return account.address;
 };
-`;

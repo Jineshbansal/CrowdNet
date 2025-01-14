@@ -1,12 +1,12 @@
 import { Header } from '@/components';
 import React, { useState } from 'react';
-import { GearApi } from '@gear-js/api';
-import { Sails } from 'sails-js';
 import { SailsIdlParser } from 'sails-js-parser';
-import { web3FromSource, web3Accounts } from '@polkadot/extension-dapp';
-import { idl } from '@/app/utils';
+import { initializeSails, executeTransaction } from '@/app/utils';
 import Loader from '@/components/loader/Loader';
+import toast from 'react-hot-toast';
 import './HostEvent.css';
+import { Sails } from 'sails-js';
+import { alice } from '@/app/utils';
 
 const HostEvent = () => {
   const [formData, setFormData] = useState({
@@ -32,81 +32,45 @@ const HostEvent = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    console.log('Submitted');
 
     const parser = await SailsIdlParser.new();
     const sails = new Sails(parser);
 
-    async function State() {
-      console.log('hello');
-      try {
-        sails.parseIdl(idl);
-        const gearApi = await GearApi.create({
-          providerAddress: 'wss://testnet.vara.network',
-        });
-        sails.setApi(gearApi);
-        sails.setProgramId(import.meta.env.VITE_APP_PROGRAM_ID);
-        console.log('Program ID:', import.meta.env.VITE_APP_PROGRAM_ID);
-        const alice = 'kGkLEU3e3XXkJp2WK4eNpVmSab5xUNL9QtmLPh8QfCL2EgotW';
-        const eventCount = await sails.services.Common.queries.GetEventCount(
-          alice
-        );
-        console.log(eventCount);
-        console.log('Event Count:', formData.event_date);
-        console.log('Event Count:', formData.duration);
-        const transaction = sails.services.Events.functions.CreateEvent([
-          eventCount,
-          formData.duration,
-          BigInt(Math.floor(new Date(formData.event_date).getTime() / 1000)),
-          formData.event_name,
-          formData.event_venue,
-          formData.event_description,
-          BigInt(formData.ticket_price),
-        ]);
+    try {
+      await initializeSails(sails);
 
-        const allAccounts = await web3Accounts();
-        const account = allAccounts[0];
-        const injector = await web3FromSource(account.meta.source);
-        transaction.withAccount(account.address, { signer: injector.signer });
+      const eventCount = await sails.services.Common.queries.GetEventCount(
+        alice
+      );
+      const transaction = sails.services.Events.functions.CreateEvent([
+        eventCount,
+        formData.duration,
+        BigInt(Math.floor(new Date(formData.event_date).getTime() / 1000)),
+        formData.event_name,
+        formData.event_venue,
+        formData.event_description,
+        BigInt(formData.ticket_price),
+      ]);
 
-        transaction.withGas(100_000_000_000n);
-        const fee = await transaction.transactionFee();
-        console.log('Transaction fee:', fee.toString());
-        const { msgId, blockHash, txHash, response, isFinalized } =
-          await transaction.signAndSend();
-
-        console.log('Message ID:', msgId);
-        console.log('Transaction hash:', txHash);
-        console.log('Block hash:', blockHash);
-
-        // Check if the transaction is finalized
-        const finalized = await isFinalized;
-        console.log('Is finalized:', finalized);
-
-        // Get the response from the program
-        try {
-          const result = await response();
-          console.log('Program response:', result);
-        } catch (error) {
-          console.error('Error executing message:', error);
-        }
-      } catch (e) {
-        console.log('error:', e);
-      } finally {
-        setIsLoading(false);
-        // Clear form data after submission attempt
-        setFormData({
-          event_name: '',
-          event_date: '',
-          event_description: '',
-          event_venue: '',
-          ticket_price: '',
-          duration: '',
-        });
-      }
+      await executeTransaction(
+        transaction,
+        'Event created successfully',
+        'Failed to create event'
+      );
+    } catch (e) {
+      console.log(e);
+      toast.error('Failed to create event');
+    } finally {
+      setIsLoading(false);
+      setFormData({
+        event_name: '',
+        event_date: '',
+        event_description: '',
+        event_venue: '',
+        ticket_price: '',
+        duration: '',
+      });
     }
-
-    State();
   };
 
   return (
@@ -135,6 +99,8 @@ const HostEvent = () => {
                 name='event_name'
                 className='border border-[#00ADB5] rounded-lg bg-[#0D1B2A] my-1 text-white py-2 px-3 outline-none'
                 onChange={handleChange}
+                value={formData.event_name}
+                required
               />
             </div>
             <div className='flex flex-col w-full'>
@@ -150,6 +116,8 @@ const HostEvent = () => {
                 name='event_date'
                 className='border border-[#00ADB5] rounded-lg bg-[#0D1B2A] my-1 text-white py-2 px-3 outline-none appearance-none custom-datetime'
                 onChange={handleChange}
+                value={formData.event_date}
+                required
               />
             </div>
           </div>
@@ -165,6 +133,8 @@ const HostEvent = () => {
               name='event_description'
               className='border border-[#00ADB5] rounded-lg bg-[#0D1B2A] my-1 text-white py-2 px-3 outline-none w-full h-28 resize-none'
               onChange={handleChange}
+              value={formData.event_description}
+              required
             />
           </div>
           <div className='flex flex-col py-3 w-full'>
@@ -179,6 +149,8 @@ const HostEvent = () => {
               name='event_venue'
               className='border border-[#00ADB5] rounded-lg bg-[#0D1B2A] my-1 text-white py-2 px-3 outline-none w-full h-28 resize-none'
               onChange={handleChange}
+              value={formData.event_venue}
+              required
             />
           </div>
           <div className='flex flex-col md:flex-row gap-6 py-3'>
@@ -195,6 +167,8 @@ const HostEvent = () => {
                 name='ticket_price'
                 className='border border-[#00ADB5] rounded-lg bg-[#0D1B2A] my-1 text-white py-2 px-3 outline-none'
                 onChange={handleChange}
+                value={formData.ticket_price}
+                required
               />
             </div>
             <div className='flex flex-col w-full md:w-1/2'>
@@ -210,6 +184,8 @@ const HostEvent = () => {
                 name='duration'
                 className='border border-[#00ADB5] rounded-lg bg-[#0D1B2A] my-1 text-white py-2 px-3 outline-none'
                 onChange={handleChange}
+                value={formData.duration}
+                required
               />
             </div>
           </div>

@@ -1,40 +1,9 @@
-import { useEffect, useState } from 'react';
-import { useContext } from 'react';
-import { dAppContext } from '@/Context/dappContext';
-import { useAccount } from '@gear-js/react-hooks';
-import { useSailsCalls } from '@/app/hooks';
 import { useNavigate } from 'react-router-dom';
-import Loader from '@/components/loader/Loader';
 import './examples.css';
 import logo from '../../assets/images/icons/bookitnow.svg';
 
 function Home() {
-  const sails = useSailsCalls();
-  const { account } = useAccount();
-  const { currentVoucherId, setCurrentVoucherId, setSignlessAccount } =
-    useContext(dAppContext);
-
-  const [pageSignlessMode, setPageSignlessMode] = useState(false);
-  const [voucherModeInPolkadotAccount, setVoucherModeInPolkadotAccount] =
-    useState(false);
-  const [contractState, setContractState] = useState('');
-  const [loading, setLoading] = useState(true);
-
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!account) {
-      setPageSignlessMode(true);
-    } else {
-      setPageSignlessMode(false);
-    }
-    if (setCurrentVoucherId) setCurrentVoucherId(null);
-    setLoading(false);
-  }, [account]);
-
-  if (loading) {
-    return <Loader />;
-  }
 
   return (
     <>
