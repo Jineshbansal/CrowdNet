@@ -2,7 +2,7 @@
 
 ## Video Demo
 Working video demo
-[video link](https://x.com/Crowdnet2/status/1878215028794659038)
+[https://www.loom.com/share/0309d347c9fb4829a2e0df4f8f34f9a1?sid=f75fe3fb-89a5-451d-91b5-2874292e65e9]
 
 ## Inspiration
 
